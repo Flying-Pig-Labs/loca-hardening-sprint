@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PromptDoctor Settings</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body {
+      width: 350px;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: #f9fafb;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo {
+      font-size: 20px;
+    }
+    
+    .title {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .content {
+      padding: 20px;
+      min-height: 200px;
+    }
+    
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status.active {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #d1fae5;
+    }
+    
+    .status.inactive {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    .status.warning {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    
+    .api-section {
+      margin-bottom: 20px;
+    }
+    
+    .api-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .api-key-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+    }
+    
+    .api-key-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+    
+    .api-help {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    
+    .api-help a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+      background: #5a67d8;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .mode-selector {
+      margin-bottom: 16px;
+    }
+    
+    .mode-selector label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    
+    .mode-options {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .mode-option {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    .mode-option.selected {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .footer {
+      padding: 16px 20px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    
+    .usage-stats {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="logo">🩺</span>
+    <span class="title">PromptDoctor</span>
+  </div>
+  
+  <div class="content">
+    <div id="status" class="status">
+      Checking extension status...
+    </div>
+    
+    <div class="mode-selector">
+      <label>Analysis Mode:</label>
+      <div class="mode-options">
+        <div class="mode-option" id="mode-basic" data-mode="basic">
+          Basic
+        </div>
+        <div class="mode-option" id="mode-ai" data-mode="ai">
+          AI Enhanced
+        </div>
+      </div>
+    </div>
+    
+    <div class="api-section" id="api-section" style="display: none;">
+      <h3>Anthropic API Configuration</h3>
+      <input 
+        type="password" 
+        id="api-key" 
+        class="api-key-input"
+        placeholder="sk-ant-..."
+      >
+      <div class="api-help">
+        Get your API key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a><br>
+        Keys are stored securely in your browser only.
+      </div>
+      <button class="btn" id="save-key-btn">Save Key</button>
+      <button class="btn btn-secondary" id="test-key-btn">Test Connection</button>
+      
+      <div class="usage-stats" id="usage-stats"></div>
+    </div>
+    
+    <div class="side-panel-section" style="text-align: center; padding: 16px 0; border-top: 1px solid #e5e7eb;">
+      <button class="btn" id="open-sidepanel" style="width: 100%; padding: 12px;">
+        <span style="margin-right: 8px;">📊</span>
+        Open Side Panel
+      </button>
+      <p style="font-size: 11px; color: #6b7280; margin: 8px 0 0 0;">
+        Use the side panel for a persistent interface that stays open while you work
+      </p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <a href="https://promptdoctor.dev" target="_blank">Documentation</a> |
+    <a href="https://github.com/promptdoctor/extension" target="_blank">GitHub</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

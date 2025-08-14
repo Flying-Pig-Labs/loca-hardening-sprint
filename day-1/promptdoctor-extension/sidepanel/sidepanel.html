@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PromptDoctor Side Panel</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="sidepanel-container">
+    <!-- Header -->
+    <header class="panel-header">
+      <div class="header-main">
+        <div class="logo-section">
+          <span class="logo-icon">🩺</span>
+          <h1 class="logo-text">PromptDoctor</h1>
+        </div>
+        <div class="header-actions">
+          <button id="new-session" class="btn-icon" title="New Session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button id="settings-btn" class="btn-icon" title="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M21 12h-6m-6 0H3m13.22 4.22l4.24 4.24M1.54 18.46l4.24-4.24"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="basic">Basic</button>
+        <button class="mode-btn" data-mode="ai">AI-Enhanced</button>
+      </div>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-header">
+        <h3>What do you want to build or change?</h3>
+        <p class="input-description">Describe your request and I'll generate safer deployment prompts</p>
+      </div>
+      <div class="input-container">
+        <textarea 
+          id="user-request" 
+          class="request-input"
+          placeholder="e.g., Add user authentication with email/password login..."
+          rows="4"
+        ></textarea>
+        <div class="input-actions">
+          <button id="analyze-btn" class="btn btn-primary">
+            <span class="btn-icon">🔍</span>
+            <span>Analyze Request</span>
+          </button>
+          <button id="clear-btn" class="btn btn-secondary">
+            Clear
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Key Section (hidden by default) -->
+    <section id="api-key-section" class="api-section" style="display: none;">
+      <div class="api-header">
+        <h4>Anthropic API Key Required</h4>
+        <p>AI-Enhanced mode needs your Claude API key</p>
+      </div>
+      <div class="api-input-group">
+        <input 
+          type="password" 
+          id="api-key-input" 
+          class="api-key-input"
+          placeholder="sk-ant-api..."
+        />
+        <button id="save-api-key" class="btn btn-small">Save</button>
+        <button id="test-api-key" class="btn btn-small btn-secondary">Test</button>
+      </div>
+      <div id="api-status" class="api-status"></div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="results-section" style="display: none;">
+      <div class="results-header">
+        <h3>Generated Safety Prompts</h3>
+        <div class="results-actions">
+          <button id="copy-all" class="btn btn-small">
+            <span>📋</span> Copy All
+          </button>
+          <button id="regenerate" class="btn btn-small btn-secondary">
+            <span>🔄</span> Regenerate
+          </button>
+        </div>
+      </div>
+      <div id="results-container" class="results-container">
+        <!-- Prompts will be inserted here -->
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Analyzing your request...</p>
+      <p class="loading-subtext">Breaking down into safe deployment steps</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">💡</div>
+      <h3>Ready to make your deployments safer</h3>
+      <p>Enter a request above to get started</p>
+      <div class="quick-examples">
+        <h4>Quick Examples:</h4>
+        <button class="example-btn" data-example="Add user authentication with JWT tokens and secure session management">
+          🔐 Authentication System
+        </button>
+        <button class="example-btn" data-example="Create REST API with CRUD operations for products including validation">
+          🌐 REST API
+        </button>
+        <button class="example-btn" data-example="Implement real-time chat with WebSocket connections and message history">
+          💬 Real-time Chat
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <div class="status-info">
+        <span id="status-indicator" class="status-indicator idle">●</span>
+        <span id="status-text" class="status-text">Ready</span>
+      </div>
+      <div class="status-actions">
+        <span id="session-count" class="session-count"></span>
+        <button id="history-btn" class="btn-text" title="View History">History</button>
+      </div>
+    </footer>
+
+    <!-- History Panel (slide-in) -->
+    <div id="history-panel" class="history-panel">
+      <div class="history-header">
+        <h3>Recent Sessions</h3>
+        <button id="close-history" class="btn-icon">×</button>
+      </div>
+      <div id="history-list" class="history-list">
+        <!-- Session history will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Settings Panel (slide-in) -->
+    <div id="settings-panel" class="settings-panel">
+      <div class="settings-header">
+        <h3>Settings</h3>
+        <button id="close-settings" class="btn-icon">×</button>
+      </div>
+      <div class="settings-content">
+        <div class="setting-group">
+          <label for="auto-copy">
+            <input type="checkbox" id="auto-copy" />
+            Auto-copy to clipboard when clicking prompts
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="persist-session">
+            <input type="checkbox" id="persist-session" checked />
+            Remember last session
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="max-sessions">
+            Max sessions to keep:
+            <input type="number" id="max-sessions" min="1" max="50" value="10" />
+          </label>
+        </div>
+        <div class="setting-group">
+          <button id="clear-all-data" class="btn btn-danger">
+            Clear All Data
+          </button>
+        </div>
+        <div class="setting-group">
+          <h4>About</h4>
+          <p class="about-text">
+            PromptDoctor v0.2.0<br>
+            Making Replit deployments safer, one prompt at a time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

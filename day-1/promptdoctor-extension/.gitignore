@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Development
+.env
+.env.local
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Build
+dist/
+build/
+*.zip
+
+# Testing
+coverage/
+.nyc_output/
+
+# Chrome Extension specific
+*.pem
+*.crx
+
+# Sensitive
+api-keys.json
+secrets.json

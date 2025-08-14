@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PromptDoctor Test Page - Simulated Replit Agent</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #1c2333;
+      color: #f5f5f5;
+      padding: 40px;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #0079f2;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #888;
+      margin-bottom: 30px;
+    }
+    
+    .agent-container {
+      background: #0e1525;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #2d3748;
+    }
+    
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      color: #a0aec0;
+      font-size: 14px;
+    }
+    
+    .agent-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      color: #f5f5f5;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #4a5568;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    
+    textarea::placeholder {
+      color: #4a5568;
+    }
+    
+    .actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: #0079f2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #0066d4;
+    }
+    
+    .btn-secondary {
+      background: #2d3748;
+      color: #a0aec0;
+    }
+    
+    .btn-secondary:hover {
+      background: #4a5568;
+    }
+    
+    .info-box {
+      background: #2d3748;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 30px;
+    }
+    
+    .info-box h3 {
+      color: #0079f2;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    
+    .info-box p {
+      color: #a0aec0;
+      line-height: 1.6;
+      margin: 5px 0;
+    }
+    
+    .status {
+      background: #2d3748;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 20px;
+      display: inline-block;
+    }
+    
+    .status.success {
+      background: #065f46;
+      color: #a7f3d0;
+    }
+    
+    code {
+      background: #1a202c;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      color: #f687b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 PromptDoctor Test Page</h1>
+    <p class="subtitle">This simulates a Replit Agent interface for testing the extension</p>
+    
+    <div class="agent-container">
+      <div class="agent-header">
+        <div class="agent-icon">🤖</div>
+        <span>Replit Agent (Simulated)</span>
+      </div>
+      
+      <textarea 
+        placeholder="Describe what you want to build or change in your project..."
+        aria-label="Agent prompt input"
+      >Create a production-ready authentication system with user registration, login, password reset, and JWT tokens. Include proper error handling and security best practices.</textarea>
+      
+      <div class="actions">
+        <button class="btn-primary">Run Agent</button>
+        <button class="btn-secondary">Clear</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <h3>📝 Testing Instructions</h3>
+      <p>1. Install the PromptDoctor extension in Chrome</p>
+      <p>2. The 🩺 PromptDoctor button should appear in the top-right of the textarea</p>
+      <p>3. Try clicking the button - it should show a notification</p>
+      <p>4. Test with empty textarea - should show warning</p>
+      <p>5. Test scrolling - button should follow the textarea</p>
+    </div>
+    
+    <div class="info-box">
+      <h3>🎯 Expected Behavior</h3>
+      <p>✅ Button appears within 1-2 seconds of page load</p>
+      <p>✅ Button has hover and click animations</p>
+      <p>✅ Clicking shows temporary notification</p>
+      <p>✅ Button stays positioned relative to textarea on scroll</p>
+      <p>✅ Extension popup shows "Active" status</p>
+    </div>
+    
+    <div id="test-status" class="status">
+      Waiting for PromptDoctor extension...
+    </div>
+  </div>
+  
+  <script>
+    // Check if extension injected its button
+    setTimeout(() => {
+      const button = document.getElementById('promptdoctor-button');
+      const status = document.getElementById('test-status');
+      
+      if (button) {
+        status.textContent = '✅ PromptDoctor button detected!';
+        status.className = 'status success';
+      } else {
+        status.textContent = '⚠️ PromptDoctor button not found - check extension';
+      }
+    }, 3000);
+    
+    // Add some interactivity
+    document.querySelector('.btn-secondary').addEventListener('click', () => {
+      document.querySelector('textarea').value = '';
+    });
+    
+    document.querySelector('.btn-primary').addEventListener('click', () => {
+      alert('This is a test page - Agent functionality not implemented');
+    });
+  </script>
+</body>
+</html>
