@@ -88,17 +88,32 @@ Your task is to:
 4. Return ONLY a valid JSON object following the exact schema provided
 
 COMPLEXITY ASSESSMENT RULES:
-- TRIVIAL: Simple text changes, typo fixes, basic UI tweaks WITH specific values provided
-  Example: "change button text from 'Login' to 'Sign In'"
+- TRIVIAL: Simple text/label/copy changes, typo fixes, basic UI text updates
+  Examples: 
+    * "change button text from 'Login' to 'Sign In'"
+    * "update the login page text to say Welcome You! instead of Welcome"
+    * "fix typo in header"
+    * "change color to blue"
+  IMPORTANT: If it's just changing display text/labels (not logic), it's TRIVIAL
   
 - LOW: Single component changes, clear requirements, no system interactions
-  Example: "add a loading spinner to the form"
+  Examples:
+    * "add a loading spinner to the form"
+    * "hide the footer on mobile"
+    * "add a new static page"
   
 - MEDIUM: Multiple components, some integration, moderate uncertainty
-  Example: "add user profile page with edit functionality"
+  Examples:
+    * "add user profile page with edit functionality"
+    * "integrate with external API for weather data"
+    * "add form validation logic"
   
 - HIGH: System-wide changes, external integrations, payment/auth/database operations
-  Example: "implement OAuth login with Google"
+  Examples:
+    * "implement OAuth login with Google"
+    * "add payment processing"
+    * "migrate database schema"
+    * "refactor authentication system"
 
 CRITICAL: Assess based on the COMPLETE request context:
 - "add tooltip" → Could be TRIVIAL if static text

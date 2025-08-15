@@ -303,17 +303,32 @@ class PromptOrchestrator {
     
     // 7. Check for truly trivial patterns (must be very specific)
     const isTrivialPattern = 
-      // Specific text change with exact values
-      (requestLower.match(/change\s+(\w+\s+)?(text|label|title|message|copy)\s+(from\s+)?["'].*["']\s+to\s+["'].*["']/) ||
-       // Fix typo with specific word
-       requestLower.match(/fix\s+(the\s+)?typo\s+["'].*["']/) ||
-       // Simple color/style change with specific value
-       requestLower.match(/change\s+(\w+\s+)?(color|background|font)\s+to\s+(#[0-9a-f]{6}|["'].*["'])/) ||
-       // Update specific number/version
+      // Text change patterns (with or without quotes)
+      (requestLower.match(/update\s+(\w+\s+)?(text|label|title|message|copy|page)\s+.*(to say|to read|to display|to show|to)\s+.*(instead of|from)/i) ||
+       requestLower.match(/change\s+(\w+\s+)?(text|label|title|message|copy)\s+.*(to|from)/i) ||
+       requestLower.match(/(change|update|modify)\s+.*(text|label|title|copy|message).*(from|to)/i) ||
+       // Fix typo patterns
+       requestLower.match(/fix\s+(the\s+)?typo/i) ||
+       requestLower.match(/correct\s+(the\s+)?spelling/i) ||
+       // Simple style changes
+       requestLower.match(/change\s+(\w+\s+)?(color|background|font|style)\s+to/i) ||
+       // Update specific version/number
        requestLower.match(/update\s+(\w+\s+)?(version|number)\s+to\s+[\d.]+/));
     
-    if (isTrivialPattern && complexityScore < 2) {
-      return 'trivial';
+    // For trivial patterns, check if it's really about UI text/display (not logic)
+    const isUITextChange = (requestLower.includes('text') || requestLower.includes('label') || 
+                           requestLower.includes('title') || requestLower.includes('message') ||
+                           requestLower.includes('copy') || requestLower.includes('typo')) &&
+                          (requestLower.includes('to say') || requestLower.includes('instead of') ||
+                           requestLower.includes('change') || requestLower.includes('update'));
+    
+    // More aggressive trivial detection for clear text changes
+    if ((isTrivialPattern || isUITextChange) && complexityScore < 4) {
+      // Extra check: make sure it's not involving complex systems
+      const hasComplexSystem = technicalComplexity.high.some(word => requestLower.includes(word));
+      if (!hasComplexSystem) {
+        return 'trivial';
+      }
     }
     
     // Final scoring
