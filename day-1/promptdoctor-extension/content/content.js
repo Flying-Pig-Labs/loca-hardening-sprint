@@ -402,22 +402,29 @@ class PromptDoctorInjector {
   handleButtonClick(prompt, element) {
     console.log('PromptDoctor clicked with prompt:', prompt);
     
+    // First store the prompt in storage
+    if (prompt) {
+      chrome.storage.local.set({ 'pd:pendingPrompt': prompt });
+    }
+    
     // Send message to background to open side panel
     chrome.runtime.sendMessage({
       action: 'openSidePanel',
       prompt: prompt
     }, (response) => {
+      // Check for Chrome runtime errors
+      if (chrome.runtime.lastError) {
+        console.error('Chrome runtime error:', chrome.runtime.lastError);
+        this.showNotification('Failed to open panel. Please try clicking the extension icon.', 'error');
+        return;
+      }
+      
       if (response && response.success) {
-        console.log('Side panel opened');
-        
-        // Store the prompt in storage so side panel can access it
-        if (prompt) {
-          chrome.storage.local.set({ 'pd:pendingPrompt': prompt });
-        }
+        console.log('Side panel opened successfully');
+        this.showNotification('PromptDoctor panel opened!', 'success');
       } else {
-        console.error('Failed to open side panel:', response?.error);
-        // Fallback to modal if side panel fails
-        this.showNotification('Opening PromptDoctor panel...', 'info');
+        console.error('Failed to open side panel:', response?.error || 'Unknown error');
+        this.showNotification('Failed to open panel. Please try clicking the extension icon.', 'error');
       }
     });
   }
