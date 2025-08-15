@@ -139,7 +139,7 @@ async function handleSidePanelMessage(msg, port) {
 
 // Enhanced analysis with multi-phase orchestration
 async function analyzeRequestEnhanced(msg, port) {
-  const { sessionId, request, mode, apiKey } = msg;
+  const { sessionId, request, mode, apiKey, applicationContext } = msg;
   
   try {
     let result;
@@ -150,6 +150,15 @@ async function analyzeRequestEnhanced(msg, port) {
       await orchestrator.initialize();
     }
     
+    // If application context is provided, set it in the orchestrator
+    if (applicationContext) {
+      console.log('Using application context:', applicationContext.length, 'characters');
+      // Store context in orchestrator for use in analysis
+      if (orchestrator.contextLoader) {
+        orchestrator.context = orchestrator.contextLoader.parseContextFile(applicationContext);
+      }
+    }
+    
     // Check if we should use enhanced AI analysis
     if (mode === 'ai' && apiKey) {
       console.log('Using enhanced AI analysis with orchestration');
@@ -157,6 +166,11 @@ async function analyzeRequestEnhanced(msg, port) {
       // Initialize enhanced analyzer with API key
       enhancedAnalyzer = new EnhancedAIAnalysisEngine(apiKey);
       await enhancedAnalyzer.initialize();
+      
+      // Set application context in enhanced analyzer
+      if (applicationContext && enhancedAnalyzer.contextLoader) {
+        enhancedAnalyzer.context = enhancedAnalyzer.contextLoader.parseContextFile(applicationContext);
+      }
       
       // Get orchestrated and AI-enhanced workflow
       result = await enhancedAnalyzer.analyzeRequest(request);

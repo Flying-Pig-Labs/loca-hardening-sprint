@@ -10,6 +10,8 @@ class PromptDoctorSidePanel {
     this.currentMode = 'basic';
     this.apiKey = null;
     this.port = null;
+    this.applicationContext = null;
+    this.contextEnabled = true;
     
     this.init();
   }
@@ -72,15 +74,34 @@ class PromptDoctorSidePanel {
         'pd:sessions',
         'pd:lastSession',
         'pd:settings',
-        'anthropic_api_key'
+        'anthropic_api_key',
+        'pd:applicationContext',
+        'pd:contextEnabled'
       ]);
       
       this.currentMode = state['pd:currentMode'] || 'basic';
       this.sessions = state['pd:sessions'] || [];
       this.apiKey = state.anthropic_api_key;
+      this.applicationContext = state['pd:applicationContext'] || null;
+      this.contextEnabled = state['pd:contextEnabled'] !== false; // Default to true
       
       // Update mode buttons
       this.setMode(this.currentMode);
+      
+      // Load context if exists
+      if (this.applicationContext) {
+        const contextInput = document.getElementById('context-input');
+        if (contextInput) {
+          contextInput.value = this.applicationContext;
+          this.updateContextCharCount(this.applicationContext.length);
+        }
+      }
+      
+      // Update context enabled checkbox
+      const contextEnabledCheckbox = document.getElementById('context-enabled');
+      if (contextEnabledCheckbox) {
+        contextEnabledCheckbox.checked = this.contextEnabled;
+      }
       
     } catch (error) {
       console.error('Failed to load state:', error);
@@ -139,6 +160,35 @@ class PromptDoctorSidePanel {
     // Clear button
     document.getElementById('clear-btn').addEventListener('click', () => {
       this.clearInput();
+    });
+    
+    // Application Context button
+    document.getElementById('context-btn').addEventListener('click', () => {
+      this.toggleContextSection();
+    });
+    
+    // Context section buttons
+    document.getElementById('save-context').addEventListener('click', () => {
+      this.saveApplicationContext();
+    });
+    
+    document.getElementById('clear-context').addEventListener('click', () => {
+      this.clearApplicationContext();
+    });
+    
+    document.getElementById('close-context').addEventListener('click', () => {
+      this.hideContextSection();
+    });
+    
+    // Context enabled checkbox
+    document.getElementById('context-enabled').addEventListener('change', (e) => {
+      this.contextEnabled = e.target.checked;
+      this.saveContextState();
+    });
+    
+    // Context textarea character count
+    document.getElementById('context-input').addEventListener('input', (e) => {
+      this.updateContextCharCount(e.target.value.length);
     });
     
     // New session button
@@ -285,13 +335,17 @@ class PromptDoctorSidePanel {
     // Update UI to show loading
     this.showLoadingState();
     
+    // Get application context if enabled
+    const context = this.getContextForAPICall();
+    
     // Send to background for processing
     this.port.postMessage({
       type: 'ANALYZE_REQUEST',
       sessionId: sessionId,
       request: userRequest,
       mode: this.currentMode,
-      apiKey: this.currentMode === 'ai' ? this.apiKey : null
+      apiKey: this.currentMode === 'ai' ? this.apiKey : null,
+      applicationContext: context
     });
   }
   
@@ -848,6 +902,123 @@ class PromptDoctorSidePanel {
     } else {
       document.getElementById('empty-state').style.display = 'flex';
     }
+  }
+  
+  // Application Context Management Methods
+  toggleContextSection() {
+    const contextSection = document.getElementById('context-section');
+    const resultsSection = document.getElementById('results-section');
+    
+    if (contextSection.style.display === 'none' || !contextSection.style.display) {
+      contextSection.style.display = 'block';
+      resultsSection.style.display = 'none';
+    } else {
+      contextSection.style.display = 'none';
+    }
+  }
+  
+  hideContextSection() {
+    const contextSection = document.getElementById('context-section');
+    contextSection.style.display = 'none';
+  }
+  
+  async saveApplicationContext() {
+    const contextInput = document.getElementById('context-input');
+    const contextStatus = document.getElementById('context-status');
+    
+    if (!contextInput) return;
+    
+    const context = contextInput.value.trim();
+    
+    if (!context) {
+      this.showNotification('Context cannot be empty', 'warning');
+      return;
+    }
+    
+    try {
+      // Save to storage
+      await chrome.storage.local.set({
+        'pd:applicationContext': context,
+        'pd:contextEnabled': this.contextEnabled
+      });
+      
+      this.applicationContext = context;
+      
+      // Update status
+      contextStatus.textContent = 'Saved';
+      contextStatus.className = 'context-status saved';
+      
+      this.showNotification('Application context saved', 'success');
+      
+      // Clear status after 3 seconds
+      setTimeout(() => {
+        contextStatus.textContent = '';
+        contextStatus.className = 'context-status';
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Failed to save context:', error);
+      contextStatus.textContent = 'Error saving';
+      contextStatus.className = 'context-status error';
+      this.showNotification('Failed to save context', 'error');
+    }
+  }
+  
+  async clearApplicationContext() {
+    const contextInput = document.getElementById('context-input');
+    const contextStatus = document.getElementById('context-status');
+    
+    if (contextInput) {
+      contextInput.value = '';
+      this.updateContextCharCount(0);
+    }
+    
+    try {
+      // Remove from storage
+      await chrome.storage.local.remove(['pd:applicationContext']);
+      this.applicationContext = null;
+      
+      // Update status
+      contextStatus.textContent = 'Cleared';
+      contextStatus.className = 'context-status';
+      
+      this.showNotification('Application context cleared', 'success');
+      
+      // Clear status after 3 seconds
+      setTimeout(() => {
+        contextStatus.textContent = '';
+        contextStatus.className = 'context-status';
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Failed to clear context:', error);
+      this.showNotification('Failed to clear context', 'error');
+    }
+  }
+  
+  async saveContextState() {
+    try {
+      await chrome.storage.local.set({
+        'pd:contextEnabled': this.contextEnabled
+      });
+    } catch (error) {
+      console.error('Failed to save context state:', error);
+    }
+  }
+  
+  updateContextCharCount(count) {
+    const charCountElement = document.getElementById('context-char-count');
+    if (charCountElement) {
+      charCountElement.textContent = `${count.toLocaleString()} characters`;
+    }
+  }
+  
+  getContextForAPICall() {
+    if (!this.contextEnabled || !this.applicationContext) {
+      return null;
+    }
+    
+    return this.applicationContext;
   }
   
   showNotification(message, type = 'info') {

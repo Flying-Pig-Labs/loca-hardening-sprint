@@ -706,6 +706,111 @@ body {
   background: #94a3b8;
 }
 
+/* Application Context Section */
+.context-section {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px;
+}
+
+.context-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.context-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.context-description {
+  margin-bottom: 12px;
+}
+
+.context-description p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.context-input-container {
+  margin-bottom: 12px;
+}
+
+.context-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  resize: vertical;
+  min-height: 200px;
+  max-height: 400px;
+  transition: border-color 0.2s;
+}
+
+.context-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.context-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.context-status {
+  font-weight: 500;
+}
+
+.context-status.saved {
+  color: #10b981;
+}
+
+.context-status.error {
+  color: #ef4444;
+}
+
+.context-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.context-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.context-toggle label {
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.context-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 /* Responsive adjustments for narrow panels */
 @media (max-width: 400px) {
   .panel-header {

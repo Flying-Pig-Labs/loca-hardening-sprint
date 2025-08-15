@@ -259,9 +259,9 @@
     </div>
     
     <div class="context-section">
-      <h3 class="context-title">🎯 The Power of Context Files</h3>
+      <h3 class="context-title">🎯 Application Context (Optional)</h3>
       <div class="context-content">
-        <p>The .context file is your project's knowledge base. It tells PromptDoctor everything about your application:</p>
+        <p>Provide context about your application to get highly specific, tailored prompts. This information will be included in all AI analysis to generate more accurate and relevant guidance.</p>
         <ul style="margin: 15px 0; padding-left: 25px;">
           <li>Technology stack and frameworks</li>
           <li>Business rules and constraints</li>
@@ -270,7 +270,29 @@
           <li>Performance targets and monitoring setup</li>
           <li>Known issues and workarounds</li>
         </ul>
-        <p>With this context, PromptDoctor transforms vague requests like "add user login" into comprehensive, multi-step workflows tailored to YOUR specific application.</p>
+        
+        <div style="margin-top: 20px;">
+          <label for="context-input" style="display: block; margin-bottom: 10px; font-weight: 600; color: #374151;">
+            Add Your Application Context:
+          </label>
+          <textarea 
+            id="context-input"
+            placeholder="Paste or type your application context here...&#10;&#10;Example:&#10;- Tech stack: React, Node.js, PostgreSQL&#10;- Authentication: JWT with refresh tokens&#10;- Database: PostgreSQL with Prisma ORM&#10;- Deployment: AWS ECS with Docker&#10;- Business rules: Users must verify email before login&#10;- Security: All API endpoints require authentication"
+            style="width: 100%; min-height: 200px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; resize: vertical;"
+          ></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <span id="char-count" style="color: #6b7280; font-size: 0.875em;">0 characters</span>
+            <div style="display: flex; gap: 10px;">
+              <button id="save-context-btn" class="btn btn-primary" style="padding: 8px 20px;">
+                Save Context
+              </button>
+              <button id="skip-context-btn" class="btn btn-secondary" style="padding: 8px 20px;">
+                Skip for Now
+              </button>
+            </div>
+          </div>
+          <div id="context-status" style="margin-top: 10px; font-size: 0.875em; font-weight: 500;"></div>
+        </div>
       </div>
     </div>
     
@@ -354,10 +376,79 @@ E-commerce platform with React frontend and Node.js backend
   </div>
   
   <script>
-    // Auto-close after 60 seconds
+    // Context management
+    const contextInput = document.getElementById('context-input');
+    const charCount = document.getElementById('char-count');
+    const contextStatus = document.getElementById('context-status');
+    const saveBtn = document.getElementById('save-context-btn');
+    const skipBtn = document.getElementById('skip-context-btn');
+    
+    // Load existing context if any
+    chrome.storage.local.get(['pd:applicationContext'], (result) => {
+      if (result['pd:applicationContext']) {
+        contextInput.value = result['pd:applicationContext'];
+        updateCharCount();
+      }
+    });
+    
+    // Update character count
+    function updateCharCount() {
+      const count = contextInput.value.length;
+      charCount.textContent = `${count.toLocaleString()} characters`;
+    }
+    
+    // Listen for context input changes
+    contextInput.addEventListener('input', updateCharCount);
+    
+    // Save context button
+    saveBtn.addEventListener('click', async () => {
+      const context = contextInput.value.trim();
+      
+      if (!context) {
+        showStatus('Please enter some context before saving', 'error');
+        return;
+      }
+      
+      try {
+        await chrome.storage.local.set({
+          'pd:applicationContext': context,
+          'pd:contextEnabled': true
+        });
+        
+        showStatus('Context saved successfully! You can now close this page.', 'success');
+        
+        // Auto-close after successful save
+        setTimeout(() => {
+          window.close();
+        }, 3000);
+        
+      } catch (error) {
+        showStatus('Failed to save context. Please try again.', 'error');
+        console.error('Failed to save context:', error);
+      }
+    });
+    
+    // Skip button
+    skipBtn.addEventListener('click', () => {
+      window.close();
+    });
+    
+    // Show status message
+    function showStatus(message, type) {
+      contextStatus.textContent = message;
+      contextStatus.style.color = type === 'success' ? '#10b981' : 
+                                  type === 'error' ? '#ef4444' : '#6b7280';
+      
+      // Clear status after 5 seconds
+      setTimeout(() => {
+        contextStatus.textContent = '';
+      }, 5000);
+    }
+    
+    // Auto-close after 5 minutes if no action taken
     setTimeout(() => {
       window.close();
-    }, 60000);
+    }, 300000); // 5 minutes
   </script>
 </body>
 </html>

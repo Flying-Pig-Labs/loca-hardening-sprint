@@ -11,37 +11,14 @@ class ContextLoader {
   }
 
   /**
+   * @deprecated - Use loadStoredContext() instead
    * Load context from file system (for extension use)
-   * This will be called from background script
+   * This method is deprecated in favor of UI-based context management
    */
   async loadContextFile() {
-    try {
-      // Check cache first
-      if (this.contextCache && this.lastLoadTime && 
-          (Date.now() - this.lastLoadTime) < this.cacheTimeout) {
-        return this.contextCache;
-      }
-
-      // Try to fetch the .context file from the extension's directory
-      const response = await fetch(chrome.runtime.getURL('.context'));
-      
-      if (!response.ok) {
-        console.log('No .context file found, will use default context');
-        return this.getDefaultContext();
-      }
-
-      const contextText = await response.text();
-      const parsedContext = this.parseContextFile(contextText);
-      
-      // Cache the result
-      this.contextCache = parsedContext;
-      this.lastLoadTime = Date.now();
-      
-      return parsedContext;
-    } catch (error) {
-      console.error('Failed to load context file:', error);
-      return this.getDefaultContext();
-    }
+    console.warn('loadContextFile() is deprecated. Use UI-based context management instead.');
+    // Return stored context instead of trying to load from file
+    return this.loadStoredContext();
   }
 
   /**
