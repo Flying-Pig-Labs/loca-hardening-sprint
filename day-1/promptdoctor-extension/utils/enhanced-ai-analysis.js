@@ -65,6 +65,13 @@ class EnhancedAIAnalysisEngine {
       const response = await this.callClaudeAPI(systemPrompt, userPrompt);
       const enhanced = this.parseEnhancedResponse(response);
       
+      // Debug logging to understand what AI is returning
+      console.log('🔍 AI Analysis for request:', userRequest);
+      console.log('📊 AI determined complexity:', enhanced.analysis?.complexity);
+      console.log('📋 AI generated prompts count:', enhanced.prompts?.length);
+      console.log('🎯 Original orchestrator complexity:', workflow.analysis?.complexity);
+      console.log('📝 Original orchestrator phase count:', workflow.prompts?.length);
+      
       // Merge AI enhancements with orchestrated workflow
       return this.mergeEnhancements(workflow, enhanced);
     } catch (error) {
@@ -355,6 +362,24 @@ Focus on making the prompts so detailed that someone unfamiliar with the project
   mergeEnhancements(workflow, enhanced) {
     // If AI provided analysis, use it to override the initial assessment
     if (enhanced.analysis) {
+      // Special case: If orchestrator detected trivial text change, be conservative
+      // about letting AI override to higher complexity
+      const orchestratorSaysTrivial = workflow.analysis?.complexity === 'trivial';
+      const aiSaysHigherComplexity = enhanced.analysis.complexity && 
+        enhanced.analysis.complexity !== 'trivial';
+      const isLikelyTextChange = workflow.originalRequest && 
+        (workflow.originalRequest.toLowerCase().includes('text') ||
+         workflow.originalRequest.toLowerCase().includes('label') ||
+         workflow.originalRequest.toLowerCase().includes('to say') ||
+         workflow.originalRequest.toLowerCase().includes('instead of'));
+      
+      if (orchestratorSaysTrivial && aiSaysHigherComplexity && isLikelyTextChange) {
+        console.log('⚠️ AI wants to override trivial->higher complexity for likely text change. Keeping trivial.');
+        // Keep the orchestrator's trivial assessment
+        enhanced.analysis.complexity = 'trivial';
+        enhanced.analysis.riskLevel = 'low';
+      }
+      
       workflow.analysis = {
         ...workflow.analysis,
         ...enhanced.analysis
@@ -366,7 +391,7 @@ Focus on making the prompts so detailed that someone unfamiliar with the project
       
       // If AI determined different complexity, regenerate phases
       if (enhanced.analysis.complexity !== workflow.analysis.complexity) {
-        // The AI has better context, trust its judgment
+        // The AI has better context, trust its judgment (unless we overrode above)
         workflow.analysis.suggestedPhases = this.orchestrator ? 
           this.orchestrator.determineRequiredPhases(enhanced.analysis) : 
           workflow.analysis.suggestedPhases;
@@ -440,6 +465,64 @@ Focus on making the prompts so detailed that someone unfamiliar with the project
       return subPhaseA - subPhaseB;
     });
 
+    // Final check: If complexity is trivial, ensure we only have 2 phases
+    if (workflow.complexity === 'trivial' || workflow.analysis?.complexity === 'trivial') {
+      console.log('🎯 Enforcing trivial complexity: limiting to 2 phases');
+      // Filter to keep only planning and implementation phases
+      const planningPrompt = workflow.prompts.find(p => 
+        p.category === 'planning' || p.title?.toLowerCase().includes('planning')
+      );
+      const implementationPrompt = workflow.prompts.find(p => 
+        p.category === 'implementation' || p.title?.toLowerCase().includes('implementation')
+      );
+      
+      workflow.prompts = [];
+      if (planningPrompt) {
+        planningPrompt.phase = 1;
+        planningPrompt.title = "Planning Phase (Simplified)";
+        planningPrompt.content = `Plan the simple text change: "${workflow.originalRequest}"
+        
+1. Identify the exact location where the text needs to be changed
+2. Determine the current text value
+3. Replace with the new text value
+4. Verify no other locations need the same change`;
+        workflow.prompts.push(planningPrompt);
+      }
+      
+      if (implementationPrompt) {
+        implementationPrompt.phase = 2;
+        implementationPrompt.title = "Implementation";
+        implementationPrompt.content = `Execute the text change: "${workflow.originalRequest}"
+
+1. Locate the file containing the text to be changed
+2. Find the exact line with the current text
+3. Replace the old text with the new text
+4. Save the file
+5. Test that the change appears correctly`;
+        workflow.prompts.push(implementationPrompt);
+      }
+      
+      // If we somehow don't have the right prompts, create minimal ones
+      if (workflow.prompts.length === 0) {
+        workflow.prompts = [
+          {
+            title: "Planning Phase (Simplified)",
+            category: "planning",
+            phase: 1,
+            risk: "low",
+            content: `Plan the simple change: "${workflow.originalRequest}"`
+          },
+          {
+            title: "Implementation",
+            category: "implementation", 
+            phase: 2,
+            risk: "low",
+            content: `Implement the change: "${workflow.originalRequest}"`
+          }
+        ];
+      }
+    }
+
     workflow.enhanced = true;
     workflow.aiAssessment = enhanced.analysis || null;
     return workflow;
@@ -449,22 +532,18 @@ Focus on making the prompts so detailed that someone unfamiliar with the project
    * Add safety wrappers to all prompts
    */
   addSafetyWrappers(prompts, riskLevel) {
-    // Prepend system safety prompt
-    const safetyPrompt = this.createSafetySystemPrompt(riskLevel);
-    
-    const wrappedPrompts = [safetyPrompt];
-    
-    // Add original prompts with safety considerations
-    prompts.forEach(prompt => {
-      if (prompt.category === 'implementation' || prompt.category === 'deployment') {
-        // Add extra safety for risky operations
-        prompt.content = this.wrapWithSafety(prompt.content, prompt.risk || riskLevel);
-      }
-      wrappedPrompts.push(prompt);
+    // Wrap ALL prompts with safety header (not just implementation/deployment)
+    const wrappedPrompts = prompts.map(prompt => {
+      // Every prompt gets the safety wrapper prepended to its content
+      const wrappedPrompt = {
+        ...prompt,
+        content: this.wrapPromptWithFullSafety(prompt.content, prompt.risk || riskLevel, prompt.category)
+      };
+      return wrappedPrompt;
     });
     
-    // Add final verification prompt
-    if (riskLevel !== 'low') {
+    // Add final verification prompt for medium/high risk
+    if (riskLevel !== 'low' && riskLevel !== 'trivial') {
       wrappedPrompts.push(this.createFinalVerificationPrompt(riskLevel));
     }
     
@@ -516,6 +595,81 @@ BEFORE PROCEEDING:
 This is a multi-phase operation. Complete each phase fully before moving to the next.`,
       enhanced: true
     };
+  }
+
+  /**
+   * Wrap prompt with full PROMPTDOCTOR SAFETY SYSTEM header
+   */
+  wrapPromptWithFullSafety(content, riskLevel, category) {
+    const riskEmoji = {
+      low: '🟢',
+      medium: '🟡', 
+      high: '🔴',
+      trivial: '🟢'
+    };
+
+    const emoji = riskEmoji[riskLevel] || '🟡';
+    
+    // The essential PROMPTDOCTOR SAFETY SYSTEM wrapper that must appear at the beginning
+    const safetyHeader = `🩺 PROMPTDOCTOR SAFETY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ SAFETY-FIRST AI AGENT INSTRUCTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RISK LEVEL: ${emoji} ${(riskLevel || 'medium').toUpperCase()}
+PHASE: ${(category || 'implementation').toUpperCase()}
+
+🔒 MANDATORY SAFETY PROTOCOLS:
+1. PRESERVE STABILITY - Never break existing functionality
+2. INCREMENTAL CHANGES - Make small, testable modifications
+3. VALIDATE CONTINUOUSLY - Test after every change
+4. DOCUMENT EVERYTHING - Track all modifications
+5. MONITOR IMPACT - Watch for side effects
+
+${riskLevel === 'high' ? `
+⚠️ HIGH-RISK OPERATION DETECTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXTREME CAUTION REQUIRED:
+• Create full backup before starting
+• Prepare and test rollback plan
+• Enable active monitoring
+• Keep incident response ready
+• Proceed with maximum care
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+` : ''}
+
+✅ PRE-FLIGHT CHECKLIST:
+□ Understand the complete request
+□ Review all safety protocols
+□ Verify necessary permissions
+□ Confirm system stability
+□ Prepare rollback capability
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 TASK INSTRUCTIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${content}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔒 POST-EXECUTION VERIFICATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After completing this task:
+✓ Verify successful completion
+✓ Check for errors or warnings
+✓ Confirm system stability
+✓ Document all changes made
+${riskLevel === 'high' ? '✓ Verify rollback availability' : ''}
+${riskLevel !== 'low' && riskLevel !== 'trivial' ? '✓ Check monitoring metrics' : ''}
+
+⚠️ STOP if anything seems wrong and investigate before continuing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END PROMPTDOCTOR SAFETY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+    return safetyHeader;
   }
 
   /**
