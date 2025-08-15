@@ -604,38 +604,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   switch (request.action) {
     case 'openSidePanel':
-      // Open the side panel when button is clicked
-      // Store the prompt first if provided
+      // Chrome doesn't allow opening side panels programmatically from content scripts
+      // We can only prepare the prompt and tell the user to click the extension icon
+      
+      // Store the prompt if provided
       if (request.prompt) {
-        chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
+        chrome.storage.local.set({ 
+          'pd:pendingPrompt': request.prompt,
+          'pd:promptTimestamp': Date.now()
+        }, () => {
+          console.log('Prompt stored for side panel');
+        });
       }
       
-      // Try to open with tab ID from sender
-      const openOptions = sender.tab ? { tabId: sender.tab.id } : {};
-      
-      chrome.sidePanel.open(openOptions)
-        .then(() => {
-          console.log('Side panel opened successfully for tab:', sender.tab?.id);
-          sendResponse({ success: true });
-        })
-        .catch(error => {
-          console.error('Failed to open side panel:', error);
-          // Try fallback with windowId
-          if (sender.tab) {
-            chrome.sidePanel.open({ windowId: sender.tab.windowId })
-              .then(() => {
-                console.log('Side panel opened with windowId fallback');
-                sendResponse({ success: true });
-              })
-              .catch(fallbackError => {
-                console.error('Fallback also failed:', fallbackError);
-                sendResponse({ success: false, error: fallbackError.message });
-              });
-          } else {
-            sendResponse({ success: false, error: error.message });
-          }
-        });
-      return true; // Keep message channel open for async response
+      // Return false to indicate we can't open it programmatically
+      // The content script will show a message to click the extension icon
+      sendResponse({ 
+        success: false, 
+        error: 'Side panel must be opened by clicking the extension icon',
+        promptStored: true 
+      });
+      return false;
       
     case 'ping':
       // Respond to ping from content script
