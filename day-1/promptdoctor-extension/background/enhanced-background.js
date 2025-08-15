@@ -584,4 +584,40 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+// Message handler for communication with content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('Enhanced background received message:', request);
+  
+  switch (request.action) {
+    case 'openSidePanel':
+      // Open the side panel when button is clicked
+      chrome.windows.getCurrent((window) => {
+        chrome.sidePanel.open({ windowId: window.id })
+          .then(() => {
+            console.log('Side panel opened successfully');
+            // Store the prompt if provided
+            if (request.prompt) {
+              chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
+            }
+            sendResponse({ success: true });
+          })
+          .catch(error => {
+            console.error('Failed to open side panel:', error);
+            sendResponse({ success: false, error: error.message });
+          });
+      });
+      return true; // Keep message channel open for async response
+      
+    case 'ping':
+      // Respond to ping from content script
+      sendResponse({ success: true });
+      return false;
+      
+    default:
+      console.log('Unknown action:', request.action);
+      sendResponse({ success: false, error: 'Unknown action' });
+      return false;
+  }
+});
+
 console.log('Enhanced PromptDoctor background service initialized');
