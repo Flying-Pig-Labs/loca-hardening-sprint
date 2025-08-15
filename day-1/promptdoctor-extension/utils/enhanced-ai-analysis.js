@@ -128,6 +128,19 @@ CRITICAL: Assess based on the COMPLETE request context:
 - "update all error messages" → MEDIUM/HIGH (scope is "all")
 - Always consider technical implications, not just keywords
 
+HANDLING VAGUE OR INSUFFICIENT REQUESTS:
+When a request is too vague to properly assess (clarity="vague" or insufficient detail):
+1. Set "sufficient": false
+2. Set "clarity": "vague" in the analysis
+3. Generate 3-5 specific clarifying questions in "clarifyingQuestions" array
+4. Questions should be specific and actionable, not generic
+5. Focus on the critical missing information needed to proceed safely
+
+Example clarifying questions for vague requests:
+- "Fix login" → ["What specific issue are you experiencing with login?", "Is this affecting all users or specific cases?", "Which login method (email/OAuth/SSO)?"]
+- "Make it faster" → ["Which specific page/feature is slow?", "What is the current load time?", "What is your target performance goal?"]
+- "Add feature" → ["What specific functionality do you need?", "Who will use this feature?", "What problem does it solve?"]
+
 WORKFLOW STRUCTURE:
 Adapt the workflow phases based on the complexity and risk of the request:
 
@@ -189,6 +202,7 @@ Return a JSON structure with your assessment and enhanced prompts:
   "confidence": 0.0-1.0,
   "changeTypes": ["frontend", "backend", "database", "auth", "payment", etc],
   "riskFactors": ["specific risks identified"],
+  "clarifyingQuestions": ["Only if sufficient=false or clarity=vague"],
   "prompts": [
     {
       "title": "Clear, descriptive title",
@@ -407,6 +421,34 @@ Focus on making the prompts so detailed that someone unfamiliar with the project
     }
     if (enhanced.changeTypes) {
       workflow.changeTypes = enhanced.changeTypes;
+    }
+    
+    // Handle clarifying questions for vague requests
+    if (enhanced.clarifyingQuestions && enhanced.clarifyingQuestions.length > 0) {
+      workflow.clarifyingQuestions = enhanced.clarifyingQuestions;
+      workflow.sufficient = false;
+      console.log('📝 Request needs clarification. Questions generated:', enhanced.clarifyingQuestions.length);
+    }
+    
+    // If request is insufficient, update the workflow
+    if (enhanced.sufficient === false) {
+      workflow.sufficient = false;
+      workflow.needsClarification = true;
+      
+      // Create a clarification prompt as the first phase
+      if (workflow.clarifyingQuestions && workflow.clarifyingQuestions.length > 0) {
+        const clarificationPrompt = {
+          title: "Clarification Needed",
+          category: "clarification",
+          phase: 0,
+          risk: "low",
+          content: this.generateClarificationPrompt(workflow.originalRequest, workflow.clarifyingQuestions),
+          enhanced: true
+        };
+        
+        // Insert clarification prompt at the beginning
+        workflow.prompts = [clarificationPrompt, ...(workflow.prompts || [])];
+      }
     }
     
     if (!enhanced.prompts || enhanced.prompts.length === 0) {
@@ -749,6 +791,39 @@ If any item is NO, document the issue and plan remediation.
 Document lessons learned and any follow-up tasks needed.`,
       enhanced: true
     };
+  }
+
+  /**
+   * Generate clarification prompt when request is vague
+   */
+  generateClarificationPrompt(originalRequest, questions) {
+    return `🤔 CLARIFICATION NEEDED
+
+Your request: "${originalRequest}"
+
+This request needs more specific details to ensure safe and accurate implementation. Please provide answers to the following questions:
+
+${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+📝 HOW TO PROCEED:
+1. Answer the questions above to clarify your requirements
+2. Provide specific examples if possible
+3. Include any constraints or dependencies
+4. Mention any existing systems that will be affected
+
+⚠️ WHY THIS MATTERS:
+- Vague requests can lead to incorrect implementations
+- Clarification prevents wasted effort and potential bugs
+- Specific requirements ensure the solution meets your needs
+- Understanding the full context helps assess risks properly
+
+Once you provide these details, I can generate a proper implementation plan with:
+- Appropriate safety checks
+- Correct risk assessment
+- Specific implementation steps
+- Relevant testing procedures
+
+Please update your request with the additional information and try again.`;
   }
 
   /**
