@@ -376,33 +376,35 @@ E-commerce platform with React frontend and Node.js backend
   </div>
   
   <script>
-    // Context management
-    const contextInput = document.getElementById('context-input');
-    const charCount = document.getElementById('char-count');
-    const contextStatus = document.getElementById('context-status');
-    const saveBtn = document.getElementById('save-context-btn');
-    const skipBtn = document.getElementById('skip-context-btn');
-    
-    // Load existing context if any
-    chrome.storage.local.get(['pd:applicationContext'], (result) => {
-      if (result['pd:applicationContext']) {
-        contextInput.value = result['pd:applicationContext'];
-        updateCharCount();
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Context management
+      const contextInput = document.getElementById('context-input');
+      const charCount = document.getElementById('char-count');
+      const contextStatus = document.getElementById('context-status');
+      const saveBtn = document.getElementById('save-context-btn');
+      const skipBtn = document.getElementById('skip-context-btn');
+      
+      // Load existing context if any
+      chrome.storage.local.get(['pd:applicationContext'], (result) => {
+        if (result['pd:applicationContext']) {
+          contextInput.value = result['pd:applicationContext'];
+          updateCharCount();
+        }
+      });
+      
+      // Update character count
+      function updateCharCount() {
+        const count = contextInput.value.length;
+        charCount.textContent = `${count.toLocaleString()} characters`;
       }
-    });
-    
-    // Update character count
-    function updateCharCount() {
-      const count = contextInput.value.length;
-      charCount.textContent = `${count.toLocaleString()} characters`;
-    }
-    
-    // Listen for context input changes
-    contextInput.addEventListener('input', updateCharCount);
-    
-    // Save context button
-    saveBtn.addEventListener('click', async () => {
-      const context = contextInput.value.trim();
+      
+      // Listen for context input changes
+      contextInput.addEventListener('input', updateCharCount);
+      
+      // Save context button
+      saveBtn.addEventListener('click', async () => {
+        const context = contextInput.value.trim();
       
       if (!context) {
         showStatus('Please enter some context before saving', 'error');
@@ -426,29 +428,44 @@ E-commerce platform with React frontend and Node.js backend
         showStatus('Failed to save context. Please try again.', 'error');
         console.error('Failed to save context:', error);
       }
-    });
-    
-    // Skip button
-    skipBtn.addEventListener('click', () => {
-      window.close();
-    });
-    
-    // Show status message
-    function showStatus(message, type) {
-      contextStatus.textContent = message;
-      contextStatus.style.color = type === 'success' ? '#10b981' : 
-                                  type === 'error' ? '#ef4444' : '#6b7280';
+      });
       
-      // Clear status after 5 seconds
-      setTimeout(() => {
-        contextStatus.textContent = '';
-      }, 5000);
-    }
+      // Skip button
+      skipBtn.addEventListener('click', () => {
+        window.close();
+      });
+      
+      // Show status message
+      function showStatus(message, type) {
+        contextStatus.textContent = message;
+        contextStatus.style.color = type === 'success' ? '#10b981' : 
+                                    type === 'error' ? '#ef4444' : '#6b7280';
+        
+        // Clear status after 5 seconds
+        setTimeout(() => {
+          contextStatus.textContent = '';
+        }, 5000);
+      }
     
-    // Auto-close after 5 minutes if no action taken
-    setTimeout(() => {
-      window.close();
-    }, 300000); // 5 minutes
+      // Auto-close after 5 minutes if no action taken
+      setTimeout(() => {
+        window.close();
+      }, 300000); // 5 minutes
+      
+      // Open Prompt Doctor button
+      const openBtn = document.getElementById('open-promptdoctor');
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          // Open the side panel
+          chrome.runtime.sendMessage({ action: 'openSidePanel' }, () => {
+            // Close the welcome page after opening side panel
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          });
+        });
+      }
+    }); // End of DOMContentLoaded
   </script>
 </body>
 </html>
