@@ -605,21 +605,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case 'openSidePanel':
       // Open the side panel when button is clicked
-      chrome.windows.getCurrent((window) => {
-        chrome.sidePanel.open({ windowId: window.id })
-          .then(() => {
-            console.log('Side panel opened successfully');
-            // Store the prompt if provided
-            if (request.prompt) {
-              chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
-            }
-            sendResponse({ success: true });
-          })
-          .catch(error => {
-            console.error('Failed to open side panel:', error);
+      // Store the prompt first if provided
+      if (request.prompt) {
+        chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
+      }
+      
+      // Try to open with tab ID from sender
+      const openOptions = sender.tab ? { tabId: sender.tab.id } : {};
+      
+      chrome.sidePanel.open(openOptions)
+        .then(() => {
+          console.log('Side panel opened successfully for tab:', sender.tab?.id);
+          sendResponse({ success: true });
+        })
+        .catch(error => {
+          console.error('Failed to open side panel:', error);
+          // Try fallback with windowId
+          if (sender.tab) {
+            chrome.sidePanel.open({ windowId: sender.tab.windowId })
+              .then(() => {
+                console.log('Side panel opened with windowId fallback');
+                sendResponse({ success: true });
+              })
+              .catch(fallbackError => {
+                console.error('Fallback also failed:', fallbackError);
+                sendResponse({ success: false, error: fallbackError.message });
+              });
+          } else {
             sendResponse({ success: false, error: error.message });
-          });
-      });
+          }
+        });
       return true; // Keep message channel open for async response
       
     case 'ping':
