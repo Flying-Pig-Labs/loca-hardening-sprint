@@ -402,85 +402,24 @@ class PromptDoctorInjector {
   handleButtonClick(prompt, element) {
     console.log('PromptDoctor clicked with prompt:', prompt);
     
-    // Send message to background to store prompt
+    // Send message to background to open side panel
     chrome.runtime.sendMessage({
       action: 'openSidePanel',
       prompt: prompt
     }, (response) => {
-      // Check for Chrome runtime errors
-      if (chrome.runtime.lastError) {
-        console.error('Chrome runtime error:', chrome.runtime.lastError);
-        this.showNotification('Error: Please reload the page and try again.', 'error');
-        return;
-      }
-      
-      if (response && response.promptStored) {
-        // Prompt was stored, show instruction to click extension icon
-        const message = prompt 
-          ? '✅ Prompt saved! Click the PromptDoctor extension icon (🩺) in your toolbar to open the panel.'
-          : '👆 Click the PromptDoctor extension icon (🩺) in your toolbar to open the panel.';
+      if (response && response.success) {
+        console.log('Side panel opened');
         
-        this.showNotification(message, 'info', 5000);
-        
-        // Also show a visual indicator pointing to the extension icon
-        this.showExtensionIconIndicator();
+        // Store the prompt in storage so side panel can access it
+        if (prompt) {
+          chrome.storage.local.set({ 'pd:pendingPrompt': prompt });
+        }
       } else {
-        this.showNotification('Error: Could not prepare panel. Please try again.', 'error');
+        console.error('Failed to open side panel:', response?.error);
+        // Fallback message if side panel fails
+        this.showNotification('Opening PromptDoctor panel...', 'info');
       }
     });
-  }
-  
-  showExtensionIconIndicator() {
-    // Create an arrow pointing to the extension area
-    const indicator = document.createElement('div');
-    indicator.id = 'pd-icon-indicator';
-    indicator.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 80px;
-      z-index: 10001;
-      background: #667eea;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-      animation: pulse 2s ease-in-out infinite;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-    
-    indicator.innerHTML = `
-      <span>Click here →</span>
-      <span style="font-size: 20px;">🩺</span>
-    `;
-    
-    // Add pulse animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Remove indicator when clicked or after 10 seconds
-    indicator.addEventListener('click', () => {
-      indicator.remove();
-      this.showNotification('Click the PromptDoctor icon in your browser toolbar', 'info');
-    });
-    
-    setTimeout(() => {
-      if (document.getElementById('pd-icon-indicator')) {
-        indicator.remove();
-      }
-    }, 10000);
-    
-    document.body.appendChild(indicator);
   }
   
   openPromptDoctorModal(initialPrompt = '') {

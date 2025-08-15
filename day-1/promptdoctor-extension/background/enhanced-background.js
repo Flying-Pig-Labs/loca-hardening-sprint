@@ -604,27 +604,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   switch (request.action) {
     case 'openSidePanel':
-      // Chrome doesn't allow opening side panels programmatically from content scripts
-      // We can only prepare the prompt and tell the user to click the extension icon
-      
-      // Store the prompt if provided
-      if (request.prompt) {
-        chrome.storage.local.set({ 
-          'pd:pendingPrompt': request.prompt,
-          'pd:promptTimestamp': Date.now()
-        }, () => {
-          console.log('Prompt stored for side panel');
-        });
-      }
-      
-      // Return false to indicate we can't open it programmatically
-      // The content script will show a message to click the extension icon
-      sendResponse({ 
-        success: false, 
-        error: 'Side panel must be opened by clicking the extension icon',
-        promptStored: true 
+      // Open the side panel when button is clicked
+      chrome.windows.getCurrent((window) => {
+        chrome.sidePanel.open({ windowId: window.id })
+          .then(() => {
+            console.log('Side panel opened successfully');
+            // Store the prompt if provided
+            if (request.prompt) {
+              chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
+            }
+            sendResponse({ success: true });
+          })
+          .catch(error => {
+            console.error('Failed to open side panel:', error);
+            sendResponse({ success: false, error: error.message });
+          });
       });
-      return false;
+      return true; // Keep message channel open for async response
       
     case 'ping':
       // Respond to ping from content script
