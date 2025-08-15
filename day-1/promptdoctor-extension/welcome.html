@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to PromptDoctor Enhanced</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 900px;
+      width: 100%;
+      padding: 60px;
+    }
+    
+    h1 {
+      color: #1f2937;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .version-badge {
+      background: #10b981;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.4em;
+      font-weight: 500;
+    }
+    
+    .subtitle {
+      color: #6b7280;
+      font-size: 1.2em;
+      margin-bottom: 40px;
+    }
+    
+    .feature-section {
+      margin-bottom: 40px;
+    }
+    
+    .feature-title {
+      color: #4b5563;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .feature-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-card h3 {
+      color: #374151;
+      font-size: 1.1em;
+      margin-bottom: 10px;
+    }
+    
+    .feature-card p {
+      color: #6b7280;
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+    
+    .context-section {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .context-title {
+      color: #92400e;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+    }
+    
+    .context-content {
+      color: #78350f;
+      line-height: 1.6;
+    }
+    
+    .code-block {
+      background: #1f2937;
+      color: #10b981;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    
+    .getting-started {
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .getting-started h3 {
+      color: #065f46;
+      margin-bottom: 15px;
+    }
+    
+    .steps {
+      list-style: none;
+      counter-reset: step-counter;
+    }
+    
+    .steps li {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 15px;
+      color: #374151;
+    }
+    
+    .steps li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: #667eea;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5a67d8;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .emoji {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <span class="emoji">🩺</span>
+      Welcome to PromptDoctor
+      <span class="version-badge">ENHANCED v2.0</span>
+    </h1>
+    <p class="subtitle">Transform vague requests into intelligent, multi-phase implementation workflows</p>
+    
+    <div class="feature-section">
+      <h2 class="feature-title">
+        <span class="emoji">✨</span>
+        What's New in Enhanced Version
+      </h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>🔬 Research-First Approach</h3>
+          <p>Every request now starts with a comprehensive research phase to understand requirements, dependencies, and risks before implementation.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📊 Multi-Phase Workflows</h3>
+          <p>Requests are broken into 6 distinct phases: Research, Planning, Validation, Implementation, Testing, and Deployment.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🎯 Context Awareness</h3>
+          <p>Load a .context file with your project details to get highly specific, tailored prompts for your exact technology stack.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🤖 AI Enhancement</h3>
+          <p>Claude AI analyzes requests and generates intelligent, prescriptive guidance specific to your project.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🛡️ Enhanced Safety</h3>
+          <p>Risk assessment, rollback planning, and validation checkpoints ensure safe deployments.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📝 Detailed Guidance</h3>
+          <p>Each phase includes specific questions, checklists, and success criteria for thorough execution.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="context-section">
+      <h3 class="context-title">🎯 The Power of Context Files</h3>
+      <div class="context-content">
+        <p>The .context file is your project's knowledge base. It tells PromptDoctor everything about your application:</p>
+        <ul style="margin: 15px 0; padding-left: 25px;">
+          <li>Technology stack and frameworks</li>
+          <li>Business rules and constraints</li>
+          <li>API structure and database schema</li>
+          <li>Security requirements and compliance needs</li>
+          <li>Performance targets and monitoring setup</li>
+          <li>Known issues and workarounds</li>
+        </ul>
+        <p>With this context, PromptDoctor transforms vague requests like "add user login" into comprehensive, multi-step workflows tailored to YOUR specific application.</p>
+      </div>
+    </div>
+    
+    <div class="getting-started">
+      <h3>🚀 Getting Started</h3>
+      <ol class="steps">
+        <li>
+          <strong>Open the Side Panel:</strong> Click the PromptDoctor icon in your Chrome toolbar while on Replit.com
+        </li>
+        <li>
+          <strong>Configure Your Context:</strong> Go to Settings and add your project's .context file content
+        </li>
+        <li>
+          <strong>Add Your API Key:</strong> Enter your Anthropic API key for AI-enhanced analysis
+        </li>
+        <li>
+          <strong>Enter a Request:</strong> Type any development request, even if vague
+        </li>
+        <li>
+          <strong>Get Multi-Phase Workflow:</strong> Receive detailed, context-aware prompts for each phase
+        </li>
+      </ol>
+    </div>
+    
+    <div class="feature-section">
+      <h2 class="feature-title">
+        <span class="emoji">📋</span>
+        Example Context File
+      </h2>
+      <div class="code-block">
+# Project Context File
+
+## Application Overview
+E-commerce platform with React frontend and Node.js backend
+
+## Technology Stack
+- Frontend: React 18, TypeScript, Redux
+- Backend: Node.js, Express, PostgreSQL
+- Authentication: JWT with refresh tokens
+- Payment: Stripe API
+
+## Critical Business Rules
+1. All payments must be PCI-DSS compliant
+2. User data must be GDPR compliant
+3. Inventory updates must be real-time
+
+## Security Requirements
+- TLS 1.3 for all communications
+- MFA for admin accounts
+- Session timeout after 30 minutes
+      </div>
+    </div>
+    
+    <div class="feature-section">
+      <h2 class="feature-title">
+        <span class="emoji">🔄</span>
+        How It Works
+      </h2>
+      <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
+        When you enter a request like "add shopping cart to the website", PromptDoctor:
+      </p>
+      <ol style="padding-left: 25px; color: #374151; line-height: 1.8;">
+        <li><strong>Analyzes</strong> your request to understand intent, scope, and risk</li>
+        <li><strong>References</strong> your .context file for project-specific details</li>
+        <li><strong>Generates</strong> research questions to uncover requirements</li>
+        <li><strong>Creates</strong> a planning phase with architecture decisions</li>
+        <li><strong>Provides</strong> validation steps before implementation</li>
+        <li><strong>Breaks down</strong> implementation into safe, atomic steps</li>
+        <li><strong>Includes</strong> comprehensive testing and deployment guidance</li>
+      </ol>
+    </div>
+    
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="chrome.action.openPopup()">
+        Open PromptDoctor
+      </button>
+      <button class="btn btn-secondary" onclick="window.close()">
+        Close This Tab
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // Auto-close after 60 seconds
+    setTimeout(() => {
+      window.close();
+    }, 60000);
+  </script>
+</body>
+</html>

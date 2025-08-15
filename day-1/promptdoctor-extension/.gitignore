@@ -30,3 +30,9 @@ coverage/
 # Sensitive
 api-keys.json
 secrets.json
+
+# Context files - contain project-specific information
+.context
+*.context
+.context.*
+user-context.txt
