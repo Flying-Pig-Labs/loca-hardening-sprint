@@ -38,10 +38,16 @@ initializeModules();
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('PromptDoctor Enhanced installed:', details.reason);
   
-  // Set side panel behavior
+  // Don't set panel behavior since we have a popup that handles opening
+  // The popup will open the side panel programmatically
+  
+  // Set the side panel options to ensure it's enabled globally
   chrome.sidePanel
-    .setPanelBehavior({ openPanelOnActionClick: true })
-    .catch(error => console.error('Failed to set panel behavior:', error));
+    .setOptions({
+      enabled: true,
+      path: 'sidepanel/sidepanel.html'
+    })
+    .catch(error => console.error('Failed to set panel options:', error));
   
   if (details.reason === 'install') {
     // First time install - create default context file
@@ -604,23 +610,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   switch (request.action) {
     case 'openSidePanel':
-      // Open the side panel when button is clicked
-      chrome.windows.getCurrent((window) => {
-        chrome.sidePanel.open({ windowId: window.id })
-          .then(() => {
-            console.log('Side panel opened successfully');
-            // Store the prompt if provided
-            if (request.prompt) {
-              chrome.storage.local.set({ 'pd:pendingPrompt': request.prompt });
-            }
-            sendResponse({ success: true });
-          })
-          .catch(error => {
-            console.error('Failed to open side panel:', error);
-            sendResponse({ success: false, error: error.message });
-          });
-      });
-      return true; // Keep message channel open for async response
+      // Open the side panel
+      if (sender.tab) {
+        // From content script - use the tab's window
+        chrome.sidePanel.open({ windowId: sender.tab.windowId });
+      } else {
+        // From popup or other context
+        chrome.windows.getCurrent(window => {
+          chrome.sidePanel.open({ windowId: window.id });
+        });
+      }
+      return false;
       
     case 'ping':
       // Respond to ping from content script
@@ -633,5 +633,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return false;
   }
 });
+
+// Note: action.onClicked won't fire because we have a popup configured in manifest
+// The side panel can be opened via:
+// 1. The popup UI (most reliable)
+// 2. The fallback modal in content script (works around Chrome bug)
+// 3. Manual click on extension icon if setPanelBehavior is configured
 
 console.log('Enhanced PromptDoctor background service initialized');

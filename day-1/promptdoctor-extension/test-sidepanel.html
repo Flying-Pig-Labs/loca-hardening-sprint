@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PromptDoctor Side Panel Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+    
+    .test-section {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section h2 {
+      color: #374151;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .status.success {
+      display: block;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #d1fae5;
+    }
+    
+    .status.error {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    .status.info {
+      display: block;
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #dbeafe;
+    }
+    
+    .instructions {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .instructions h3 {
+      color: #854d0e;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .instructions ol {
+      color: #713f12;
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+    }
+    
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🩺 PromptDoctor Side Panel Test</h1>
+    <p class="subtitle">Test page for debugging the side panel opening functionality</p>
+    
+    <div class="instructions">
+      <h3>📋 Testing Instructions:</h3>
+      <ol>
+        <li>Make sure the PromptDoctor extension is installed and enabled</li>
+        <li>Enter a test prompt in the textarea below</li>
+        <li>Click "Test Side Panel Opening" to simulate the bubble button click</li>
+        <li>The side panel should open with your prompt loaded</li>
+        <li>Check the browser console (F12) for any error messages</li>
+      </ol>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test Prompt Input</h2>
+      <textarea id="test-prompt" placeholder="Enter a test prompt here, e.g., 'Add user authentication with email/password login'">Add a user dashboard with profile management and settings</textarea>
+      
+      <div class="button-group">
+        <button id="test-sidepanel" class="btn-primary">
+          🚀 Test Side Panel Opening
+        </button>
+        <button id="clear-prompt" class="btn-secondary">
+          Clear
+        </button>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Alternative Tests</h2>
+      <div class="button-group">
+        <button id="test-without-prompt" class="btn-secondary">
+          Test Without Prompt
+        </button>
+        <button id="test-direct-api" class="btn-secondary">
+          Test Direct API Call
+        </button>
+        <button id="check-extension" class="btn-secondary">
+          Check Extension Status
+        </button>
+      </div>
+    </div>
+    
+    <div id="status" class="status"></div>
+  </div>
+  
+  <script>
+    // Helper function to show status
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.className = `status ${type}`;
+      statusDiv.textContent = message;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Test side panel opening with prompt
+    document.getElementById('test-sidepanel').addEventListener('click', async () => {
+      const prompt = document.getElementById('test-prompt').value.trim();
+      
+      if (!prompt) {
+        showStatus('Please enter a test prompt first', 'error');
+        return;
+      }
+      
+      console.log('Testing side panel opening with prompt:', prompt);
+      showStatus('Attempting to open side panel...', 'info');
+      
+      try {
+        // Send message to extension background script
+        chrome.runtime.sendMessage(
+          'YOUR_EXTENSION_ID', // This will be replaced dynamically
+          {
+            action: 'openSidePanel',
+            prompt: prompt
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error('Chrome runtime error:', chrome.runtime.lastError);
+              showStatus(`Error: ${chrome.runtime.lastError.message}`, 'error');
+              
+              // Try alternate method
+              console.log('Trying alternate method...');
+              testAlternateMethod(prompt);
+            } else if (response && response.success) {
+              console.log('Side panel opened successfully:', response);
+              showStatus('✅ Side panel opened successfully!', 'success');
+            } else {
+              console.error('Failed to open side panel:', response);
+              showStatus(`Failed: ${response?.error || 'Unknown error'}`, 'error');
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Exception while opening side panel:', error);
+        showStatus(`Exception: ${error.message}`, 'error');
+      }
+    });
+    
+    // Test without prompt
+    document.getElementById('test-without-prompt').addEventListener('click', () => {
+      console.log('Testing side panel opening without prompt');
+      showStatus('Testing without prompt...', 'info');
+      
+      chrome.runtime.sendMessage(
+        {
+          action: 'openSidePanel'
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Chrome runtime error:', chrome.runtime.lastError);
+            showStatus(`Error: ${chrome.runtime.lastError.message}`, 'error');
+          } else if (response && response.success) {
+            console.log('Side panel opened successfully:', response);
+            showStatus('✅ Side panel opened (no prompt)!', 'success');
+          } else {
+            console.error('Failed to open side panel:', response);
+            showStatus(`Failed: ${response?.error || 'Unknown error'}`, 'error');
+          }
+        }
+      );
+    });
+    
+    // Test direct API call (for debugging)
+    document.getElementById('test-direct-api').addEventListener('click', async () => {
+      console.log('Testing direct chrome.sidePanel API...');
+      showStatus('Testing direct API call...', 'info');
+      
+      try {
+        // This will only work if we're in an extension context
+        if (typeof chrome !== 'undefined' && chrome.sidePanel) {
+          // Get current tab
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          
+          await chrome.sidePanel.open({
+            tabId: tab.id,
+            windowId: tab.windowId
+          });
+          
+          showStatus('✅ Direct API call successful!', 'success');
+        } else {
+          showStatus('chrome.sidePanel API not available in this context', 'error');
+        }
+      } catch (error) {
+        console.error('Direct API call failed:', error);
+        showStatus(`Direct API failed: ${error.message}`, 'error');
+      }
+    });
+    
+    // Check extension status
+    document.getElementById('check-extension').addEventListener('click', () => {
+      console.log('Checking extension status...');
+      showStatus('Checking extension...', 'info');
+      
+      // Check if we can communicate with the extension
+      chrome.runtime.sendMessage(
+        {
+          action: 'ping'
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Extension not responding:', chrome.runtime.lastError);
+            showStatus('❌ Extension not responding or not installed', 'error');
+          } else if (response && response.success) {
+            console.log('Extension is active:', response);
+            showStatus('✅ Extension is active and responding!', 'success');
+          } else {
+            showStatus('Extension responded but with unexpected format', 'error');
+          }
+        }
+      );
+    });
+    
+    // Clear prompt
+    document.getElementById('clear-prompt').addEventListener('click', () => {
+      document.getElementById('test-prompt').value = '';
+    });
+    
+    // Alternate method using window.postMessage
+    function testAlternateMethod(prompt) {
+      console.log('Trying window.postMessage method...');
+      
+      // Create a temporary content script-like behavior
+      const messageHandler = (event) => {
+        if (event.data && event.data.type === 'PROMPTDOCTOR_OPEN_SIDEPANEL') {
+          console.log('Message received by window:', event.data);
+        }
+      };
+      
+      window.addEventListener('message', messageHandler);
+      
+      // Post message to self (simulating content script)
+      window.postMessage({
+        type: 'PROMPTDOCTOR_OPEN_SIDEPANEL',
+        prompt: prompt
+      }, '*');
+      
+      // Clean up
+      setTimeout(() => {
+        window.removeEventListener('message', messageHandler);
+      }, 1000);
+    }
+    
+    // Log initial state
+    console.log('PromptDoctor Side Panel Test Page Loaded');
+    console.log('Chrome APIs available:', {
+      chrome: typeof chrome !== 'undefined',
+      runtime: typeof chrome !== 'undefined' && !!chrome.runtime,
+      sidePanel: typeof chrome !== 'undefined' && !!chrome.sidePanel
+    });
+  </script>
+</body>
+</html>
