@@ -400,12 +400,13 @@ class PromptDoctorInjector {
   }
   
   handleButtonClick(prompt, element) {
-    console.log('PromptDoctor button clicked');
+    console.log('PromptDoctor button clicked with prompt:', prompt);
     
-    // Just open the side panel
-    chrome.runtime.sendMessage({
-      action: 'openSidePanel'
-    });
+    // Store reference to the textarea/element for later use
+    this.targetTextarea = element;
+    
+    // Open the PromptDoctor modal with the current prompt
+    this.openPromptDoctorModal(prompt);
   }
   
   openPromptDoctorModal(initialPrompt = '') {
