@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Meta Prompt Feature</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #667eea;
+    }
+    .test-section {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .test-button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .test-button:hover {
+      background: #764ba2;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Meta Prompt Feature Test</h1>
+  
+  <div class="test-section">
+    <h2>Test Instructions</h2>
+    <ol>
+      <li>Load the extension in Chrome</li>
+      <li>Open the side panel</li>
+      <li>Click the "Replit Meta Prompt" button</li>
+      <li>Verify the meta prompt section appears</li>
+      <li>Click "Copy to Clipboard" and verify it copies</li>
+      <li>Check that the notification appears</li>
+    </ol>
+  </div>
+
+  <div class="test-section">
+    <h2>Feature Checklist</h2>
+    <ul>
+      <li>✅ Added "Replit Meta Prompt" button to the input actions</li>
+      <li>✅ Created meta prompt section in HTML</li>
+      <li>✅ Added toggle functionality to show/hide section</li>
+      <li>✅ Implemented copy to clipboard functionality</li>
+      <li>✅ Added visual feedback for successful copy</li>
+      <li>✅ Styled the section to match existing design</li>
+      <li>✅ Formatted prompt for optimal readability</li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Load Side Panel</h2>
+    <p>The side panel should display below:</p>
+    <iframe src="sidepanel/sidepanel.html"></iframe>
+  </div>
+
+  <div class="test-section">
+    <h2>Meta Prompt Content</h2>
+    <p>The following meta prompt has been added to the extension:</p>
+    <pre style="background: white; padding: 15px; border-radius: 6px; white-space: pre-wrap; line-height: 1.6;">
+For EVERY response you give me in this chat, I want you to think through it step-by-step before answering to ensure maximum relevance and value provided. Use this internal process (tell me at the beginning of every response whether you've used this internal framework for your response):
+
+<strong>UNDERSTAND:</strong> Break down what I'm actually asking for, what my goals are (ask me to confirm)
+
+<strong>CONTEXT:</strong> Consider relevant background information and constraints, ask as many clarifying questions as needed that have a significant difference on the output
+
+<strong>PERSPECTIVES:</strong> Look at this from ALL relevant angles or viewpoints that allow for higher-quality and valid solutions
+
+<strong>REASONING:</strong> Work through the logical connections and implications, enabling detailed answers
+
+<strong>SYNTHESIS:</strong> Combine insights into a coherent, practical response to provide as much value as possible
+
+Then give me your response in a natural, conversational tone, but I want to see that deeper thinking reflected in the quality and specificity of your answer. Don't show me the steps unless I ask, just let that reasoning improve your response.
+
+Most importantly: If you need more information to give me the most valuable and precise answer possible, ask me clarifying questions. Don't make assumptions: dig deeper to understand exactly what I need.
+    </pre>
+  </div>
+
+  <script>
+    console.log('Test page loaded - Meta Prompt feature ready for testing');
+  </script>
+</body>
+</html>

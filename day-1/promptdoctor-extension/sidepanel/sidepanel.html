@@ -58,6 +58,10 @@
             <span class="btn-icon">📝</span>
             <span>Application Context</span>
           </button>
+          <button id="meta-prompt-btn" class="btn btn-secondary">
+            <span class="btn-icon">🎯</span>
+            <span>Replit Meta Prompt</span>
+          </button>
           <button id="clear-btn" class="btn btn-secondary">
             Clear
           </button>
@@ -99,6 +103,49 @@
         <div class="context-buttons">
           <button id="save-context" class="btn btn-primary">Save Context</button>
           <button id="clear-context" class="btn btn-secondary">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meta Prompt Section (hidden by default) -->
+    <section id="meta-prompt-section" class="meta-prompt-section" style="display: none;">
+      <div class="meta-prompt-header">
+        <h3>Replit Meta Prompt</h3>
+        <button id="close-meta-prompt" class="btn-icon" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="meta-prompt-description">
+        <p>Copy this meta prompt and paste it at the beginning of your Replit chat window to enhance AI responses:</p>
+      </div>
+      <div class="meta-prompt-container">
+        <div id="meta-prompt-content" class="meta-prompt-content">
+For EVERY response you give me in this chat, I want you to think through it step-by-step before answering to ensure maximum relevance and value provided. Use this internal process (tell me at the beginning of every response whether you've used this internal framework for your response):
+
+<strong>UNDERSTAND:</strong> Break down what I'm actually asking for, what my goals are (ask me to confirm)
+
+<strong>CONTEXT:</strong> Consider relevant background information and constraints, ask as many clarifying questions as needed that have a significant difference on the output
+
+<strong>PERSPECTIVES:</strong> Look at this from ALL relevant angles or viewpoints that allow for higher-quality and valid solutions
+
+<strong>REASONING:</strong> Work through the logical connections and implications, enabling detailed answers
+
+<strong>SYNTHESIS:</strong> Combine insights into a coherent, practical response to provide as much value as possible
+
+Then give me your response in a natural, conversational tone, but I want to see that deeper thinking reflected in the quality and specificity of your answer. Don't show me the steps unless I ask, just let that reasoning improve your response.
+
+Most importantly: If you need more information to give me the most valuable and precise answer possible, ask me clarifying questions. Don't make assumptions: dig deeper to understand exactly what I need.
+        </div>
+        <div class="meta-prompt-actions">
+          <button id="copy-meta-prompt" class="btn btn-primary">
+            <span>📋</span> Copy to Clipboard
+          </button>
+          <div id="meta-prompt-status" class="copy-status" style="display: none;">
+            ✅ Copied to clipboard!
+          </div>
         </div>
       </div>
     </section>

@@ -167,6 +167,11 @@ class PromptDoctorSidePanel {
       this.toggleContextSection();
     });
     
+    // Meta Prompt button
+    document.getElementById('meta-prompt-btn').addEventListener('click', () => {
+      this.toggleMetaPromptSection();
+    });
+    
     // Context section buttons
     document.getElementById('save-context').addEventListener('click', () => {
       this.saveApplicationContext();
@@ -178,6 +183,15 @@ class PromptDoctorSidePanel {
     
     document.getElementById('close-context').addEventListener('click', () => {
       this.hideContextSection();
+    });
+    
+    // Meta Prompt section buttons
+    document.getElementById('close-meta-prompt').addEventListener('click', () => {
+      this.hideMetaPromptSection();
+    });
+    
+    document.getElementById('copy-meta-prompt').addEventListener('click', () => {
+      this.copyMetaPrompt();
     });
     
     // Context enabled checkbox
@@ -1019,6 +1033,65 @@ class PromptDoctorSidePanel {
     }
     
     return this.applicationContext;
+  }
+  
+  // Meta Prompt Management Methods
+  toggleMetaPromptSection() {
+    const metaPromptSection = document.getElementById('meta-prompt-section');
+    const resultsSection = document.getElementById('results-section');
+    const contextSection = document.getElementById('context-section');
+    
+    if (metaPromptSection.style.display === 'none' || !metaPromptSection.style.display) {
+      metaPromptSection.style.display = 'block';
+      resultsSection.style.display = 'none';
+      contextSection.style.display = 'none';
+    } else {
+      metaPromptSection.style.display = 'none';
+    }
+  }
+  
+  hideMetaPromptSection() {
+    const metaPromptSection = document.getElementById('meta-prompt-section');
+    metaPromptSection.style.display = 'none';
+  }
+  
+  copyMetaPrompt() {
+    const metaPromptContent = document.getElementById('meta-prompt-content');
+    const statusDiv = document.getElementById('meta-prompt-status');
+    
+    if (!metaPromptContent) return;
+    
+    // Get the text content without HTML tags
+    const metaPromptText = `For EVERY response you give me in this chat, I want you to think through it step-by-step before answering to ensure maximum relevance and value provided. Use this internal process (tell me at the beginning of every response whether you've used this internal framework for your response):
+
+UNDERSTAND: Break down what I'm actually asking for, what my goals are (ask me to confirm)
+
+CONTEXT: Consider relevant background information and constraints, ask as many clarifying questions as needed that have a significant difference on the output
+
+PERSPECTIVES: Look at this from ALL relevant angles or viewpoints that allow for higher-quality and valid solutions
+
+REASONING: Work through the logical connections and implications, enabling detailed answers
+
+SYNTHESIS: Combine insights into a coherent, practical response to provide as much value as possible
+
+Then give me your response in a natural, conversational tone, but I want to see that deeper thinking reflected in the quality and specificity of your answer. Don't show me the steps unless I ask, just let that reasoning improve your response.
+
+Most importantly: If you need more information to give me the most valuable and precise answer possible, ask me clarifying questions. Don't make assumptions: dig deeper to understand exactly what I need.`;
+    
+    navigator.clipboard.writeText(metaPromptText).then(() => {
+      this.showNotification('Meta prompt copied to clipboard!', 'success');
+      
+      // Show the status message
+      if (statusDiv) {
+        statusDiv.style.display = 'block';
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 3000);
+      }
+    }).catch(err => {
+      console.error('Failed to copy meta prompt:', err);
+      this.showNotification('Failed to copy meta prompt', 'error');
+    });
   }
   
   showNotification(message, type = 'info') {
