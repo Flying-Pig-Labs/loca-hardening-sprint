@@ -309,10 +309,10 @@ function showNotification(message, type) {
 async function openSidePanel() {
   try {
     // Get current window
-    const window = await chrome.windows.getCurrent();
+    const currentWindow = await chrome.windows.getCurrent();
     
     // Open side panel for the current window
-    await chrome.sidePanel.open({ windowId: window.id });
+    await chrome.sidePanel.open({ windowId: currentWindow.id });
     
     // Close the popup after opening side panel
     window.close();
