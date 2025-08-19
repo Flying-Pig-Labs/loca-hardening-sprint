@@ -229,6 +229,8 @@
   resize: vertical;
   transition: border-color 0.2s ease;
   box-sizing: border-box;
+  background: white;
+  color: #1f2937;
 }
 
 .user-request-input:focus {
@@ -547,6 +549,8 @@
   resize: vertical;
   transition: border-color 0.2s ease;
   box-sizing: border-box;
+  background: white;
+  color: #1f2937;
 }
 
 .enhanced-request-input:focus {

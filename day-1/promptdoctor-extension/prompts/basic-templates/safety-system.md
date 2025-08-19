@@ -15,7 +15,7 @@ SAFETY PRINCIPLES:
 2. REVERSIBLE CHANGES - Ensure changes can be undone
 3. TEST EVERYTHING - Verify after each step
 
-Proceed with implementing this change following safety protocols.
+Remember the above rules in the following prompts and reply with 'OK, understood' to confirm your understanding.
 ```
 
 ## Variables
