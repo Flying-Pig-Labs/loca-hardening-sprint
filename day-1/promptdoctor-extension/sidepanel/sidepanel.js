@@ -172,6 +172,11 @@ class PromptDoctorSidePanel {
       this.toggleMetaPromptSection();
     });
     
+    // Conversation Mode button
+    document.getElementById('conversation-prompt-btn').addEventListener('click', () => {
+      this.copyConversationPrompt();
+    });
+    
     // Context section buttons
     document.getElementById('save-context').addEventListener('click', () => {
       this.saveApplicationContext();
@@ -1055,11 +1060,45 @@ class PromptDoctorSidePanel {
     metaPromptSection.style.display = 'none';
   }
   
+  copyConversationPrompt() {
+    // Include Application Context if available
+    let contextSection = '';
+    if (this.applicationContext) {
+      contextSection = `\n\nAPPLICATION CONTEXT:\n${this.applicationContext}\n\nUse the above application context to understand the specific project I'm working on and provide relevant help.\n`;
+    }
+    
+    // Conversation mode prompt with context
+    const conversationPromptText = `I want to have a natural conversation with you about my project. Please respond conversationally and helpfully, but keep in mind the application context provided.${contextSection}
+Let's talk naturally - no need for formal frameworks or structured thinking unless I specifically ask for it. Just be helpful, friendly, and knowledgeable about my project.
+
+Feel free to:
+- Ask clarifying questions when needed
+- Suggest improvements or alternatives
+- Share relevant examples or best practices
+- Help me think through problems
+
+But always keep responses focused and relevant to what I'm asking about.`;
+    
+    navigator.clipboard.writeText(conversationPromptText).then(() => {
+      const contextMsg = this.applicationContext ? ' (with Application Context)' : '';
+      this.showNotification(`Conversation prompt copied${contextMsg}!`, 'success');
+    }).catch(err => {
+      console.error('Failed to copy conversation prompt:', err);
+      this.showNotification('Failed to copy conversation prompt', 'error');
+    });
+  }
+  
   copyMetaPrompt() {
     const metaPromptContent = document.getElementById('meta-prompt-content');
     const statusDiv = document.getElementById('meta-prompt-status');
     
     if (!metaPromptContent) return;
+    
+    // Include Application Context if available
+    let contextSection = '';
+    if (this.applicationContext) {
+      contextSection = `\n\nAPPLICATION CONTEXT:\n${this.applicationContext}\n\nUse the above application context to provide more specific and relevant guidance tailored to this particular project.\n`;
+    }
     
     // Get the text content without HTML tags
     const metaPromptText = `For EVERY response you give me in this chat, I want you to think through it step-by-step before answering to ensure maximum relevance and value provided. Use this internal process (tell me at the beginning of every response whether you've used this internal framework for your response):
@@ -1076,10 +1115,11 @@ SYNTHESIS: Combine insights into a coherent, practical response to provide as mu
 
 Then give me your response in a natural, conversational tone, but I want to see that deeper thinking reflected in the quality and specificity of your answer. Don't show me the steps unless I ask, just let that reasoning improve your response.
 
-Most importantly: If you need more information to give me the most valuable and precise answer possible, ask me clarifying questions. Don't make assumptions: dig deeper to understand exactly what I need.`;
+Most importantly: If you need more information to give me the most valuable and precise answer possible, ask me clarifying questions. Don't make assumptions: dig deeper to understand exactly what I need.${contextSection}`;
     
     navigator.clipboard.writeText(metaPromptText).then(() => {
-      this.showNotification('Meta prompt copied to clipboard!', 'success');
+      const contextMsg = this.applicationContext ? ' (with Application Context)' : '';
+      this.showNotification(`Meta prompt copied to clipboard${contextMsg}!`, 'success');
       
       // Show the status message
       if (statusDiv) {
