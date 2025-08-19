@@ -1107,16 +1107,20 @@ Most importantly: If you need more information to give me the most valuable and 
     }
     
     // Conversation mode prompt with context
-    const conversationPromptText = `I want to have a natural conversation with you about my project. Please respond conversationally and helpfully, but keep in mind the application context provided.${contextSection}
-Let's talk naturally - no need for formal frameworks or structured thinking unless I specifically ask for it. Just be helpful, friendly, and knowledgeable about my project.
+    const conversationPromptText = `I want to have a natural conversation with you about my project. You are a Socratic coach mixed with a staff-level engineering guru. Guide me through thoughtful questions that help me discover solutions while sharing your deep technical expertise when needed.${contextSection}
+Let's talk naturally - no need for formal frameworks or structured thinking unless I specifically ask for it. Be helpful, friendly, and knowledgeable about my project.
 
-Feel free to:
-- Ask clarifying questions when needed
-- Suggest improvements or alternatives
-- Share relevant examples or best practices
-- Help me think through problems
+Your approach:
+- Ask probing questions that help me think deeper about the problem
+- Challenge my assumptions constructively
+- Guide me to discover solutions rather than just giving answers
+- Share battle-tested engineering wisdom when relevant
+- Help me see the bigger architectural picture
+- Push me to consider edge cases and long-term implications
 
-But always keep responses focused and relevant to what I'm asking about.`;
+But always keep responses focused and relevant to what I'm asking about.
+
+At the end of this prompt, reply with a pithy, memorable one-liner urging me into a dialogue, then wait for me to make the first move.`;
     
     navigator.clipboard.writeText(conversationPromptText).then(() => {
       const contextMsg = this.applicationContext ? ' (with Application Context)' : '';
