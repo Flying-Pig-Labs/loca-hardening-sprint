@@ -3,6 +3,12 @@
  * Injects the PromptDoctor button into Replit Agent interface
  */
 
+// Prevent duplicate initialization if script runs multiple times
+if (window.__promptDoctorInitialized) {
+  console.log('PromptDoctor: Already initialized, skipping...');
+} else {
+  window.__promptDoctorInitialized = true;
+
 // Note: We cannot load external scripts directly in content scripts due to Chrome security
 // Instead, we'll make the API calls directly from the content script context
 
@@ -1511,3 +1517,5 @@ if (document.readyState === 'loading') {
 } else {
   new PromptDoctorInjector();
 }
+
+} // End of initialization guard
