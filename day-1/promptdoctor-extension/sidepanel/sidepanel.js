@@ -187,12 +187,12 @@ class PromptDoctorSidePanel {
     });
     
     document.getElementById('close-context').addEventListener('click', () => {
-      this.hideContextSection();
+      document.getElementById('context-section').style.display = 'none';
     });
     
     // Meta Prompt section buttons
     document.getElementById('close-meta-prompt').addEventListener('click', () => {
-      this.hideMetaPromptSection();
+      document.getElementById('meta-prompt-section').style.display = 'none';
     });
     
     document.getElementById('copy-meta-prompt').addEventListener('click', () => {
@@ -259,6 +259,16 @@ class PromptDoctorSidePanel {
     
     document.getElementById('close-settings').addEventListener('click', () => {
       document.getElementById('settings-panel').classList.remove('open');
+    });
+    
+    // Close settings panel with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const settingsPanel = document.getElementById('settings-panel');
+        if (settingsPanel.classList.contains('open')) {
+          settingsPanel.classList.remove('open');
+        }
+      }
     });
     
     // Settings inputs
@@ -923,14 +933,20 @@ class PromptDoctorSidePanel {
     }
   }
   
+  // Unified Panel Management
+  hideAllPanels() {
+    document.getElementById('context-section').style.display = 'none';
+    document.getElementById('meta-prompt-section').style.display = 'none';
+    document.getElementById('results-section').style.display = 'none';
+  }
+  
   // Application Context Management Methods
   toggleContextSection() {
     const contextSection = document.getElementById('context-section');
-    const resultsSection = document.getElementById('results-section');
     
     if (contextSection.style.display === 'none' || !contextSection.style.display) {
+      this.hideAllPanels();
       contextSection.style.display = 'block';
-      resultsSection.style.display = 'none';
     } else {
       contextSection.style.display = 'none';
     }
@@ -1043,11 +1059,10 @@ class PromptDoctorSidePanel {
   // Meta Prompt Management Methods
   toggleMetaPromptSection() {
     const metaPromptSection = document.getElementById('meta-prompt-section');
-    const resultsSection = document.getElementById('results-section');
-    const contextSection = document.getElementById('context-section');
     const metaPromptContent = document.getElementById('meta-prompt-content');
     
     if (metaPromptSection.style.display === 'none' || !metaPromptSection.style.display) {
+      this.hideAllPanels();
       // Update the meta prompt content to include Application Context if available
       const contextIndicator = document.getElementById('context-indicator');
       if (metaPromptContent) {
@@ -1087,8 +1102,6 @@ Most importantly: If you need more information to give me the most valuable and 
       }
       
       metaPromptSection.style.display = 'block';
-      resultsSection.style.display = 'none';
-      contextSection.style.display = 'none';
     } else {
       metaPromptSection.style.display = 'none';
     }
