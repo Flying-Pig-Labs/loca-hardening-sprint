@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('save-context-btn');
   const skipBtn = document.getElementById('skip-context-btn');
   
+  // API Key management
+  const apiKeyInput = document.getElementById('api-key-input');
+  const apiKeyStatus = document.getElementById('api-key-status');
+  const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+  
   // Log elements to ensure they exist
   console.log('Elements found:', {
     contextInput: !!contextInput,
@@ -18,11 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
     skipBtn: !!skipBtn
   });
   
-  // Load existing context if any
-  chrome.storage.local.get(['pd:applicationContext'], (result) => {
+  // Load existing context and API key if any
+  chrome.storage.local.get(['pd:applicationContext', 'anthropic_api_key'], (result) => {
     if (result['pd:applicationContext']) {
       contextInput.value = result['pd:applicationContext'];
       updateCharCount();
+    }
+    
+    if (result['anthropic_api_key'] && apiKeyInput) {
+      apiKeyInput.placeholder = 'API key saved (hidden for security)';
+      apiKeyInput.setAttribute('data-has-key', 'true');
+      showApiKeyStatus('API key already saved', 'success');
     }
   });
   
@@ -93,6 +104,59 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       contextStatus.textContent = '';
     }, 5000);
+  }
+  
+  // Show API key status message
+  function showApiKeyStatus(message, type) {
+    if (apiKeyStatus) {
+      apiKeyStatus.textContent = message;
+      apiKeyStatus.style.color = type === 'success' ? '#10b981' : 
+                                  type === 'error' ? '#ef4444' : '#6b7280';
+      
+      // Clear status after 5 seconds
+      setTimeout(() => {
+        apiKeyStatus.textContent = '';
+      }, 5000);
+    }
+  }
+  
+  // Save API key button
+  if (saveApiKeyBtn) {
+    saveApiKeyBtn.addEventListener('click', async () => {
+      console.log('Save API key button clicked');
+      const apiKey = apiKeyInput.value.trim();
+      
+      if (!apiKey) {
+        showApiKeyStatus('Please enter an API key', 'error');
+        return;
+      }
+      
+      // Basic validation - Anthropic keys start with sk-ant-
+      if (!apiKey.startsWith('sk-ant-')) {
+        showApiKeyStatus('Invalid API key format. Anthropic keys start with "sk-ant-"', 'error');
+        return;
+      }
+      
+      try {
+        await chrome.storage.local.set({
+          'anthropic_api_key': apiKey,
+          'promptdoctor_mode': 'ai' // Auto-enable AI mode when key is saved
+        });
+        
+        showApiKeyStatus('API key saved successfully! AI-enhanced mode enabled.', 'success');
+        console.log('API key saved successfully');
+        
+        // Update the input to show it's saved
+        apiKeyInput.value = '';
+        apiKeyInput.placeholder = 'API key saved (hidden for security)';
+        apiKeyInput.setAttribute('data-has-key', 'true');
+        
+      } catch (error) {
+        showApiKeyStatus('Failed to save API key. Please try again.', 'error');
+        console.error('Failed to save API key:', error);
+      }
+    });
+    console.log('Save API key button listener added');
   }
 
   // Auto-close after 5 minutes if no action taken

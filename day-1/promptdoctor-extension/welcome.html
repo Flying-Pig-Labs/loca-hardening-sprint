@@ -296,6 +296,37 @@
       </div>
     </div>
     
+    <div class="api-key-section" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #c7d2fe;">
+      <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 1.25rem;">
+        <span class="emoji">🔑</span>
+        Anthropic API Key (For AI-Enhanced Mode)
+      </h3>
+      <div style="color: #475569; line-height: 1.6;">
+        <p style="margin-bottom: 16px;">Add your Anthropic API key to enable AI-enhanced analysis. This will use Claude to provide intelligent, context-aware guidance.</p>
+        
+        <div style="margin-top: 20px;">
+          <label for="api-key-input" style="display: block; margin-bottom: 10px; font-weight: 600; color: #374151;">
+            API Key:
+          </label>
+          <div style="display: flex; gap: 10px;">
+            <input 
+              type="password"
+              id="api-key-input"
+              placeholder="sk-ant-api03-..."
+              style="flex: 1; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px;"
+            />
+            <button id="save-api-key-btn" class="btn btn-primary" style="padding: 10px 20px; white-space: nowrap;">
+              Save API Key
+            </button>
+          </div>
+          <div id="api-key-status" style="margin-top: 10px; font-size: 0.875em; font-weight: 500;"></div>
+          <p style="margin-top: 12px; font-size: 0.875em; color: #6b7280;">
+            Don't have an API key? <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color: #4f46e5; text-decoration: underline;">Get one from Anthropic</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    
     <div class="getting-started">
       <h3>🚀 Getting Started</h3>
       <ol class="steps">
