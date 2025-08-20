@@ -167,9 +167,9 @@ class PromptDoctorSidePanel {
       this.openContextModal();
     });
     
-    // Meta Prompt button
+    // Build button (formerly Meta Prompt) - now copies directly
     document.getElementById('meta-prompt-btn').addEventListener('click', () => {
-      this.toggleMetaPromptSection();
+      this.copyMetaPrompt();
     });
     
     // Conversation Mode button
@@ -1269,7 +1269,7 @@ Most importantly: If you need more information to give me the most valuable and 
     
     navigator.clipboard.writeText(metaPromptText).then(() => {
       const contextMsg = this.applicationContext ? ' (with Application Context)' : '';
-      this.showNotification(`Meta prompt copied to clipboard${contextMsg}!`, 'success');
+      this.showNotification(`Build prompt copied${contextMsg}!`, 'success');
       
       // Show the status message
       if (statusDiv) {
