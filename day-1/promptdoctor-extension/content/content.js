@@ -806,7 +806,7 @@ Remember the above rules in the following prompts and reply with 'OK, understood
 2. Document current behavior
 3. Identify potential impacts
 
-Only proceed after confirming system is stable.`
+Return a detailed pre-planning research document that will give a planning team the confidence to make a deterministic plan for this request.`
         },
         {
           title: "Safe Implementation",
@@ -820,7 +820,7 @@ SAFETY GUIDELINES:
 - Preserve existing functionality
 - Document changes
 
-Follow best practices for your change type.`
+Define a plan and implement it step by step, skipping nothing and sparing no detail and putting all effort into completing the feature as requested without modifying the original requirements.`
         }
       ];
       

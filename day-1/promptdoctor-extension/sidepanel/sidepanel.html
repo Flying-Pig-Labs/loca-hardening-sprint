@@ -202,21 +202,6 @@ Most importantly: If you need more information to give me the most valuable and 
 
     <!-- Empty State -->
     <div id="empty-state" class="empty-state">
-      <div class="empty-icon">💡</div>
-      <h3>Ready to make your deployments safer</h3>
-      <p>Enter a request above to get started</p>
-      <div class="quick-examples">
-        <h4>Quick Examples:</h4>
-        <button class="example-btn" data-example="Add user authentication with JWT tokens and secure session management">
-          🔐 Authentication System
-        </button>
-        <button class="example-btn" data-example="Create REST API with CRUD operations for products including validation">
-          🌐 REST API
-        </button>
-        <button class="example-btn" data-example="Implement real-time chat with WebSocket connections and message history">
-          💬 Real-time Chat
-        </button>
-      </div>
     </div>
 
     <!-- Status Bar -->
@@ -284,6 +269,38 @@ Most importantly: If you need more information to give me the most valuable and 
             Making Replit deployments safer, one prompt at a time.
           </p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Modal -->
+  <div id="context-modal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Application Context</h2>
+        <button class="modal-close" id="close-context-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">Add context about your application that will be included in all AI analysis. This helps generate more accurate and relevant prompts.</p>
+        <textarea 
+          id="context-modal-input" 
+          class="context-modal-textarea"
+          placeholder="Paste or type your application context here...&#10;&#10;Examples:&#10;- Tech stack (React, Node.js, PostgreSQL)&#10;- Business rules and requirements&#10;- Security guidelines&#10;- Coding standards&#10;- API documentation&#10;- Domain-specific terminology"
+          rows="20"
+        ></textarea>
+        <div class="context-modal-stats">
+          <span id="context-modal-char-count">0 characters</span>
+          <div class="context-modal-toggle">
+            <input type="checkbox" id="context-modal-enabled" checked>
+            <label for="context-modal-enabled">Enable context in API calls</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-context-modal" class="btn btn-primary">Save Context</button>
+        <button id="clear-context-modal" class="btn btn-secondary">Clear</button>
+        <button id="cancel-context-modal" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
   </div>

@@ -314,8 +314,16 @@ async function openSidePanel() {
     // Open side panel for the current window
     await chrome.sidePanel.open({ windowId: currentWindow.id });
     
-    // Close the popup after opening side panel
-    window.close();
+    // Try to close the popup after opening side panel
+    // Some contexts may not support window.close()
+    try {
+      if (typeof window.close === 'function') {
+        window.close();
+      }
+    } catch (closeError) {
+      // Silently ignore if window.close() doesn't work
+      console.log('Could not close popup window:', closeError);
+    }
   } catch (error) {
     console.error('Failed to open side panel:', error);
     showNotification('Failed to open side panel', 'error');

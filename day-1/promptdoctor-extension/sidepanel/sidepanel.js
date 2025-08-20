@@ -162,9 +162,9 @@ class PromptDoctorSidePanel {
       this.clearInput();
     });
     
-    // Application Context button
+    // Application Context button - opens modal
     document.getElementById('context-btn').addEventListener('click', () => {
-      this.toggleContextSection();
+      this.openContextModal();
     });
     
     // Meta Prompt button
@@ -177,18 +177,61 @@ class PromptDoctorSidePanel {
       this.copyConversationPrompt();
     });
     
-    // Context section buttons
-    document.getElementById('save-context').addEventListener('click', () => {
-      this.saveApplicationContext();
+    // Modal Context buttons
+    document.getElementById('save-context-modal').addEventListener('click', () => {
+      this.saveApplicationContextFromModal();
     });
     
-    document.getElementById('clear-context').addEventListener('click', () => {
-      this.clearApplicationContext();
+    document.getElementById('clear-context-modal').addEventListener('click', () => {
+      this.clearApplicationContextFromModal();
     });
     
-    document.getElementById('close-context').addEventListener('click', () => {
-      document.getElementById('context-section').style.display = 'none';
+    document.getElementById('cancel-context-modal').addEventListener('click', () => {
+      this.closeContextModal();
     });
+    
+    document.getElementById('close-context-modal').addEventListener('click', () => {
+      this.closeContextModal();
+    });
+    
+    // Modal overlay click to close
+    document.querySelector('.modal-overlay').addEventListener('click', () => {
+      this.closeContextModal();
+    });
+    
+    // Context modal textarea character count
+    document.getElementById('context-modal-input').addEventListener('input', (e) => {
+      const charCount = document.getElementById('context-modal-char-count');
+      charCount.textContent = `${e.target.value.length} characters`;
+    });
+    
+    // Context modal enabled checkbox
+    document.getElementById('context-modal-enabled').addEventListener('change', (e) => {
+      this.contextEnabled = e.target.checked;
+      this.saveContextState();
+    });
+    
+    // Keep old buttons for backward compatibility (hidden)
+    const saveContextBtn = document.getElementById('save-context');
+    if (saveContextBtn) {
+      saveContextBtn.addEventListener('click', () => {
+        this.saveApplicationContext();
+      });
+    }
+    
+    const clearContextBtn = document.getElementById('clear-context');
+    if (clearContextBtn) {
+      clearContextBtn.addEventListener('click', () => {
+        this.clearApplicationContext();
+      });
+    }
+    
+    const closeContextBtn = document.getElementById('close-context');
+    if (closeContextBtn) {
+      closeContextBtn.addEventListener('click', () => {
+        document.getElementById('context-section').style.display = 'none';
+      });
+    }
     
     // Meta Prompt section buttons
     document.getElementById('close-meta-prompt').addEventListener('click', () => {
@@ -234,13 +277,7 @@ class PromptDoctorSidePanel {
       this.testAPIKey();
     });
     
-    // Example buttons
-    document.querySelectorAll('.example-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const example = e.target.dataset.example;
-        document.getElementById('user-request').value = example;
-      });
-    });
+    // Example buttons removed - no longer needed
     
     // Copy all button
     document.getElementById('copy-all').addEventListener('click', () => {
@@ -941,20 +978,77 @@ class PromptDoctorSidePanel {
   }
   
   // Application Context Management Methods
-  toggleContextSection() {
-    const contextSection = document.getElementById('context-section');
+  openContextModal() {
+    const modal = document.getElementById('context-modal');
+    const modalInput = document.getElementById('context-modal-input');
+    const modalEnabled = document.getElementById('context-modal-enabled');
+    const charCount = document.getElementById('context-modal-char-count');
     
-    if (contextSection.style.display === 'none' || !contextSection.style.display) {
-      this.hideAllPanels();
-      contextSection.style.display = 'block';
-    } else {
-      contextSection.style.display = 'none';
-    }
+    // Load current context from storage
+    chrome.storage.local.get(['applicationContext', 'contextEnabled'], (result) => {
+      modalInput.value = result.applicationContext || '';
+      modalEnabled.checked = result.contextEnabled !== false;
+      charCount.textContent = `${modalInput.value.length} characters`;
+    });
+    
+    modal.style.display = 'flex';
+  }
+  
+  closeContextModal() {
+    const modal = document.getElementById('context-modal');
+    modal.style.display = 'none';
   }
   
   hideContextSection() {
+    // Keep for backward compatibility but won't be used
     const contextSection = document.getElementById('context-section');
     contextSection.style.display = 'none';
+  }
+  
+  async saveApplicationContextFromModal() {
+    const modalInput = document.getElementById('context-modal-input');
+    const modalEnabled = document.getElementById('context-modal-enabled');
+    
+    if (!modalInput) return;
+    
+    const context = modalInput.value.trim();
+    
+    // Save to storage
+    await chrome.storage.local.set({
+      applicationContext: context,
+      contextEnabled: modalEnabled.checked
+    });
+    
+    this.applicationContext = context;
+    this.contextEnabled = modalEnabled.checked;
+    
+    // Update context indicator in other UI elements
+    this.updateContextIndicator();
+    
+    // Show success message (optional - could add a toast notification)
+    this.closeContextModal();
+    
+    // Optional: Show success feedback
+    this.updateStatus('Context saved successfully', 'success');
+    
+    console.log('Application context saved from modal:', context.length, 'characters');
+  }
+  
+  clearApplicationContextFromModal() {
+    const modalInput = document.getElementById('context-modal-input');
+    const charCount = document.getElementById('context-modal-char-count');
+    
+    if (modalInput) {
+      modalInput.value = '';
+      charCount.textContent = '0 characters';
+    }
+    
+    // Also clear from storage
+    chrome.storage.local.remove(['applicationContext'], () => {
+      this.applicationContext = '';
+      this.updateContextIndicator();
+      console.log('Application context cleared from modal');
+    });
   }
   
   async saveApplicationContext() {

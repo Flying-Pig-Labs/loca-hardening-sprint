@@ -227,7 +227,7 @@ Remember the above rules in the following prompts and reply with 'OK, understood
 3. Identify potential impacts
 4. Create backup if needed
 
-Only proceed after confirming system is stable.`
+Return a detailed pre-planning research document that will give a planning team the confidence to make a deterministic plan for this request.`
     },
     {
       title: "Safe Implementation",
