@@ -985,9 +985,9 @@ class PromptDoctorSidePanel {
     const charCount = document.getElementById('context-modal-char-count');
     
     // Load current context from storage
-    chrome.storage.local.get(['applicationContext', 'contextEnabled'], (result) => {
-      modalInput.value = result.applicationContext || '';
-      modalEnabled.checked = result.contextEnabled !== false;
+    chrome.storage.local.get(['pd:applicationContext', 'pd:contextEnabled'], (result) => {
+      modalInput.value = result['pd:applicationContext'] || this.applicationContext || '';
+      modalEnabled.checked = result['pd:contextEnabled'] !== false;
       charCount.textContent = `${modalInput.value.length} characters`;
     });
     
@@ -1013,25 +1013,27 @@ class PromptDoctorSidePanel {
     
     const context = modalInput.value.trim();
     
-    // Save to storage
-    await chrome.storage.local.set({
-      applicationContext: context,
-      contextEnabled: modalEnabled.checked
-    });
-    
-    this.applicationContext = context;
-    this.contextEnabled = modalEnabled.checked;
-    
-    // Update context indicator in other UI elements
-    this.updateContextIndicator();
-    
-    // Show success message (optional - could add a toast notification)
-    this.closeContextModal();
-    
-    // Optional: Show success feedback
-    this.updateStatus('Context saved successfully', 'success');
-    
-    console.log('Application context saved from modal:', context.length, 'characters');
+    try {
+      // Save to storage with consistent keys
+      await chrome.storage.local.set({
+        'pd:applicationContext': context,
+        'pd:contextEnabled': modalEnabled.checked
+      });
+      
+      this.applicationContext = context;
+      this.contextEnabled = modalEnabled.checked;
+      
+      // Show success notification
+      this.showNotification('Context saved successfully!', 'success');
+      
+      // Close the modal after successful save
+      this.closeContextModal();
+      
+      console.log('Application context saved from modal:', context.length, 'characters');
+    } catch (error) {
+      console.error('Failed to save context:', error);
+      this.showNotification('Failed to save context', 'error');
+    }
   }
   
   clearApplicationContextFromModal() {
@@ -1043,11 +1045,11 @@ class PromptDoctorSidePanel {
       charCount.textContent = '0 characters';
     }
     
-    // Also clear from storage
-    chrome.storage.local.remove(['applicationContext'], () => {
+    // Also clear from storage with consistent keys
+    chrome.storage.local.remove(['pd:applicationContext'], () => {
       this.applicationContext = '';
-      this.updateContextIndicator();
       console.log('Application context cleared from modal');
+      this.showNotification('Context cleared', 'success');
     });
   }
   
